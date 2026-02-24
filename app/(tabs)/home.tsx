@@ -1,20 +1,21 @@
 import { Link } from "expo-router";
 import { Stack } from "expo-router";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import {Ionicons} from "@expo/vector-icons"
 import {MaterialIcons} from "@expo/vector-icons";
 import fontsLoaded from '../_layout'
-import { AlfaSlabOne_400Regular } from "@expo-google-fonts/alfa-slab-one";
+
 
 export default function Home() {
   return (
     <View style = {styles.screen}>
       <View style={styles.header}>
-        <MaterialIcons name="account-circle" style={styles.profileIcon} />
+        <MaterialIcons name="account-circle" size={30} style={styles.profileIcon} />
         <Text style = {styles.title}>Gym Tracker</Text>
       </View>
-      <View>
-
+      <View style = {styles.content}>
+        <Text style = {styles.dashBoard}>Dashboard</Text>
       </View>
     </View>
   );
@@ -22,7 +23,9 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   profileIcon: {
-
+    position:'absolute',
+    right: 20,
+    top: 100,
   },
 
   screen: {
@@ -39,6 +42,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
 
+    marginBottom: 50,
+
     //iOS
     shadowColor: "#000",
     shadowOffset: {width: 0, height: 4},
@@ -54,6 +59,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 22,
     fontFamily: 'AlfaSlabOne_400Regular',
+
+    position: 'absolute',
+    top: 100,
   },
 
   titleContent: {
@@ -66,7 +74,13 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: 30,
+    paddingLeft: 30,
+    paddingRight: 30,
+  },
+
+  dashBoard: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 20,
   },
 });
 
