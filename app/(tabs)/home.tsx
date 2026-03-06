@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Stack } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import {Ionicons} from "@expo/vector-icons"
 import {MaterialIcons} from "@expo/vector-icons";
 import fontsLoaded from '../_layout'
@@ -9,6 +9,7 @@ import fontsLoaded from '../_layout'
 
 export default function Home() {
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style = {styles.screen}>
       <View style={styles.header}>
         <MaterialIcons name="account-circle" size={30} style={styles.profileIcon} />
@@ -18,6 +19,7 @@ export default function Home() {
         <Text style = {styles.dashBoard}>Dashboard</Text>
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

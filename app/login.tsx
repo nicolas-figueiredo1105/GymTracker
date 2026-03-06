@@ -1,69 +1,86 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { Button } from 'react-native'
 import React, {useState} from 'react'
+import { Link } from 'expo-router';
+import { useRouter } from "expo-router";
 
 
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const router = useRouter();
 
   return ( 
-    <View style = {styles.screen}>
-      <View style={styles.header}>
-        <Text style = {styles.title}>Gym Tracker</Text>
-      </View>
-      <View style = {styles.content}>
-        <Text style = {styles.formTitle}>Log In</Text>
-        <TextInput
-            style = {styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-            placeholderTextColor={"#000000a9"}
-            keyboardType='email-address'
-        />
-        <TextInput
-            value = {password}
-            onChangeText={setPassword}
-            style = {styles.input}
-            placeholder="Password"
-            placeholderTextColor={"#000000a9"}
-            secureTextEntry
-            textContentType='password'
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style = {styles.screen}>
+        <View style={styles.header}>
+          <Text style = {styles.title}>Gym Tracker</Text>
+        </View>
+        <View style = {styles.content}>
+          <Text style = {styles.formTitle}>Log In</Text>
+          <TextInput
+              style = {styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Email"
+              placeholderTextColor={"#000000a9"}
+              keyboardType='email-address'
+          />
+          <TextInput
+              value = {password}
+              onChangeText={setPassword}
+              style = {styles.input}
+              placeholder="Password"
+              placeholderTextColor={"#000000a9"}
+              secureTextEntry
+              textContentType='password'
+          />
 
-        <Pressable
-            style = {({pressed}) => [
-                styles.loginButton,
-                { backgroundColor: pressed ? "white" : "blue",
-                  color: pressed ? "blue" : "white"
-                }
-            ]}
-            onPress={() =>{
-                alert("Email: " + email + "\nPassword: " + password)
-            }}
-        >
-            {({pressed}) => (
-                <Text style = {[styles.buttonText,
-                    {color: pressed ? "blue" : "white"}
-                ]}>Log In</Text>
-            )}
-                
-            
-            
-        </Pressable>
-      </View>
+          <Pressable
+              style = {({pressed}) => [
+                  styles.loginButton,
+                  { backgroundColor: pressed ? "white" : "blue",
+                    color: pressed ? "blue" : "white"
+                  }
+              ]}
+              onPress={() =>{
+                  alert("Email: " + email + "\nPassword: " + password);
+                  setEmail("");
+                  setPassword("");
+              }}
+          >
+              {({pressed}) => (
+                  <Text style = {[styles.buttonText,
+                      {color: pressed ? "blue" : "white"}
+                  ]}>Log In</Text>
+              )}
+                  
+              
+              
+          </Pressable>
+        </View>
 
-      <View style = {styles.content}>
-        <Text style = {styles.text}>Don't have an account?{"\n"}Sign up right now!</Text>
-        <Pressable
-        style = {styles.signupButton}
-        >
-            <Text style = {styles.buttonText}>Sign Up</Text>
-        </Pressable>
+        <View style = {styles.content}>
+          <Text style = {styles.text}>Don't have an account?{"\n"}Sign up right now!</Text>
+          <Pressable
+          style = {({pressed}) => [
+                  styles.loginButton,
+                  { backgroundColor: pressed ? "white" : "blue",
+                    color: pressed ? "blue" : "white"
+                  }
+              ]}
+          onPress = {() => router.push("/signup")} 
+          >
+              {({pressed}) => (
+                  <Text style = {[styles.buttonText,
+                      {color: pressed ? "blue" : "white"}
+                  ]}>Sign Up</Text>
+              )}
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   )
 }
 const styles = StyleSheet.create({
