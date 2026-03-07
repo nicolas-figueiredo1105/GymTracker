@@ -3,6 +3,7 @@ import { Button } from 'react-native'
 import React, {useState} from 'react'
 import { Link } from 'expo-router';
 import { useRouter } from "expo-router";
+import { DatabaseService } from "../database/databaseMethods";
 
 
 
@@ -45,9 +46,13 @@ const Login = () => {
                   }
               ]}
               onPress={() =>{
-                  alert("Email: " + email + "\nPassword: " + password);
-                  setEmail("");
-                  setPassword("");
+                  if(DatabaseService.loginUser(email, password)){
+                    router.push('/(tabs)/home');
+                  } else {
+                    alert("Invalid Credentials");
+                    setEmail('');
+                    setPassword('');
+                  }
               }}
           >
               {({pressed}) => (

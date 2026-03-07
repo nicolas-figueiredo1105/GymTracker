@@ -9,7 +9,6 @@ import fontsLoaded from '../_layout'
 
 export default function Home() {
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style = {styles.screen}>
       <View style={styles.header}>
         <MaterialIcons name="account-circle" size={30} style={styles.profileIcon} />
@@ -19,7 +18,7 @@ export default function Home() {
         <Text style = {styles.dashBoard}>Dashboard</Text>
       </View>
     </View>
-    </TouchableWithoutFeedback>
+    
   );
 }
 
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
 
   title: {
     color: "white",
-    fontSize: 22,
+    fontSize: 32,
     fontFamily: 'AlfaSlabOne_400Regular',
 
     position: 'absolute',

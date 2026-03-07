@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import { Button } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { DatabaseService } from "../database/databaseMethods";
+import db from "../database/database";
+import { useRouter } from "expo-router";
 
 
 
@@ -9,6 +11,7 @@ const SignUp = () => {
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const router = useRouter();
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -66,10 +69,11 @@ const SignUp = () => {
                                 color: pressed ? "blue" : "white"
                             }
                         ]}
-                        onPress={() => {
-                            alert("Email: " + email + "\nPassword: " + password);
-                            setEmail("");
-                            setPassword("");
+                        onPress={() => {                    
+                            DatabaseService.createUser(firstName, lastName, email, password);
+                            const user = db.getAllSync("SELECT * FROM users");
+                            console.log(user);
+                            router.push("/(tabs)/home");
                         }}
                     >
                         {({ pressed }) => (
