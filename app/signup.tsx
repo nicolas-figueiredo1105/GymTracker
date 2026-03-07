@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
-import { DatabaseService } from "../database/databaseMethods";
-import db from "../database/database";
 import { useRouter } from "expo-router";
-
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 
 
 const SignUp = () => {
@@ -12,6 +12,26 @@ const SignUp = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const router = useRouter();
+
+    const signUp = async () => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+            });
+
+            console.log("User created: ", user.uid);
+            router.push('/personalInfo');
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -70,10 +90,12 @@ const SignUp = () => {
                             }
                         ]}
                         onPress={() => {                    
-                            DatabaseService.createUser(firstName, lastName, email, password);
-                            const user = db.getAllSync("SELECT * FROM users");
-                            console.log(user);
-                            router.push("/(tabs)/home");
+                            signUp();
+                            
+                            setFirstName('');
+                            setLastName('');
+                            setEmail('');
+                            setPassword('');
                         }}
                     >
                         {({ pressed }) => (

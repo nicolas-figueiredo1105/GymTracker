@@ -3,7 +3,10 @@ import { Button } from 'react-native'
 import React, {useState} from 'react'
 import { Link } from 'expo-router';
 import { useRouter } from "expo-router";
-import { DatabaseService } from "../database/databaseMethods";
+
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+
 
 
 
@@ -11,6 +14,18 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const router = useRouter();
+
+    const login = async () => {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("Logged in!");
+        router.push('/(tabs)/home');
+        return userCredential.user;
+      }catch (error) {
+        console.log(error);
+        alert("Invalid Credentials, Try Again.")
+      }
+    };
 
   return ( 
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -46,13 +61,10 @@ const Login = () => {
                   }
               ]}
               onPress={() =>{
-                  if(DatabaseService.loginUser(email, password)){
-                    router.push('/(tabs)/home');
-                  } else {
-                    alert("Invalid Credentials");
-                    setEmail('');
-                    setPassword('');
-                  }
+                  login();
+
+                  setEmail('');
+                  setPassword('');
               }}
           >
               {({pressed}) => (
