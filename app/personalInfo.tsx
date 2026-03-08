@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Button } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Button, Platform } from 'react-native';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { doc, setDoc } from "firebase/firestore";
@@ -15,7 +15,7 @@ const personalInfo = () => {
   const [height, setHeight] = useState('');
   const [bodyWeight, setBodyWeight] = useState('');
 
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
 
 
@@ -35,6 +35,12 @@ const personalInfo = () => {
       return undefined;
     }
   };
+
+  const checkSubmit = () => {
+    if(height == '' || bodyWeight == '' || dateOfBirth == null){
+      alert("Empty Fields! Fill up all the required information");
+    }
+  }
 
   const user = getCurrentUserInfo();
     
@@ -62,7 +68,7 @@ const personalInfo = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaProvider>
-        <SafeAreaView style={styles.screen}>
+        
 
           <View style={styles.header}>
             <Text style={styles.title}>Gym Tracker</Text>
@@ -71,7 +77,7 @@ const personalInfo = () => {
           <View style={styles.content}>
             <Text style={styles.formTitle}>Sign Up</Text>
 
-            <View style={styles.form}>
+            <View style={[styles.form]}>
               <View style={styles.rowWrap}>
                 <TextInput
                   style={[styles.input, { flex: 1 }]}
@@ -91,23 +97,30 @@ const personalInfo = () => {
                 />
               </View>
 
-              <Button
-                title="Date of Birth"
+              <View style={styles.rowWrap}>
+                <Pressable
+                style = {styles.input}
                 onPress={() => setShow(true)}
-              />
+              >
+                <Text>Date of Birth</Text>
+              </Pressable>
               {show && (
                 <DateTimePicker
+                  style= {[styles.content, {}]}
                   value={dateOfBirth}
                   mode="date"
                   display='default'
+                  maximumDate={new Date()}
                   onChange={(event, selectedDate) => {
-                    setShow(false);
+                    setShow(Platform.OS === "ios");
                     if (selectedDate) {
                       setDateOfBirth(selectedDate);
                     }
                   }}
                 />
               )}
+              </View>
+              
 
             </View>
 
@@ -120,6 +133,7 @@ const personalInfo = () => {
                 }
               ]}
               onPress={() => {
+                checkSubmit();
                 addPersonalInfo();
                 setHeight('');
                 setBodyWeight('');
@@ -133,7 +147,7 @@ const personalInfo = () => {
               )}
             </Pressable>
           </View>
-        </SafeAreaView>
+    
       </SafeAreaProvider>
     </TouchableWithoutFeedback>
   )
@@ -205,6 +219,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
 
         borderRadius: 10,
+        width: "50%",
 
         alignSelf: 'center',
         justifyContent: "center",
@@ -272,6 +287,8 @@ const styles = StyleSheet.create({
         gap: 10,
         marginBottom: 50,
     },
+
+
 });
 
 export default personalInfo
