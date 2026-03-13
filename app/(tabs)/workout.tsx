@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
 import { Button } from '@react-navigation/elements'
 import {MaterialIcons} from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons"
 
 
 const workout = () => {

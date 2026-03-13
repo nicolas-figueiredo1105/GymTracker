@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 import { useRouter } from "expo-router";
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth } from '../firebase';
 
 

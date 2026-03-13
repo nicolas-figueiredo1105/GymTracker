@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Button, Platform } from 'react-native';
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { getAuth } from "firebase/auth";
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+
+import {Ionicons} from "@expo/vector-icons"
+import {MaterialIcons} from "@expo/vector-icons";
 
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -14,9 +15,7 @@ const personalInfo = () => {
 
   const [height, setHeight] = useState('');
   const [bodyWeight, setBodyWeight] = useState('');
-
-  const [show, setShow] = useState(true);
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [dateOfBirth, setDateOfBirth] = useState('');
 
 
   const router = useRouter();
@@ -68,7 +67,7 @@ const personalInfo = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaProvider>
-        
+        <SafeAreaView style={{flex: 1, backgroundColor: "white"}}>
 
           <View style={styles.header}>
             <Text style={styles.title}>Gym Tracker</Text>
@@ -96,35 +95,34 @@ const personalInfo = () => {
                   keyboardType='numbers-and-punctuation'
                 />
               </View>
-
-              <View style={styles.rowWrap}>
-                <Pressable
-                style = {styles.input}
-                onPress={() => setShow(true)}
-              >
-                <Text>Date of Birth</Text>
-              </Pressable>
-              {show && (
-                <DateTimePicker
-                  style= {[styles.content, {}]}
-                  value={dateOfBirth}
-                  mode="date"
-                  display='default'
-                  maximumDate={new Date()}
-                  onChange={(event, selectedDate) => {
-                    setShow(Platform.OS === "ios");
-                    if (selectedDate) {
-                      setDateOfBirth(selectedDate);
-                    }
-                  }}
-                />
-              )}
-              </View>
               
+              <View style={[styles.rowWrap, {justifyContent:'space-between'}]}>
+                <Text style= {[styles.text, {marginBottom: 0,}]}>Date of Birth: </Text>
+                <TextInput
+                  style = {[styles.input, {position: 'relative', width: "60%"}]}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                  caretHidden = {true}
+                  keyboardType='number-pad'
+                  maxLength={8}
+                  onChangeText={setDateOfBirth}
+                >
+                  <View style= {styles.inputOverflow}>
+                    {'MM/DD/YYYY'.split('').map((placeholder, index, arr) => {
+                      const countDelimiters = arr.slice(0, index).filter(char => char === '/').length;
+                      const indexWithoutDelimeters = index - countDelimiters;
+                      const current = dateOfBirth[indexWithoutDelimeters]
 
-            </View>
-
-            <Pressable
+                      return (
+                        <Text key={index} style = {styles.inputChar}>
+                          {placeholder}
+                        </Text>
+                      )
+                    })}
+                  </View>
+                </TextInput>
+              </View>
+              <Pressable
               style={({ pressed }) => [
                 styles.signupButton,
                 {
@@ -137,7 +135,7 @@ const personalInfo = () => {
                 addPersonalInfo();
                 setHeight('');
                 setBodyWeight('');
-                setDateOfBirth(new Date());
+                setDateOfBirth('');
               }}
             >
               {({ pressed }) => (
@@ -146,8 +144,12 @@ const personalInfo = () => {
                 ]}>Get Started!</Text>
               )}
             </Pressable>
+
+            </View>
+
+            
           </View>
-    
+        </SafeAreaView>
       </SafeAreaProvider>
     </TouchableWithoutFeedback>
   )
@@ -160,13 +162,8 @@ const styles = StyleSheet.create({
         top: 100,
     },
 
-    screen: {
-        flex: 1,
-        backgroundColor: "white",
-    },
-
     header: {
-        height: 200,
+        height: 180,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'blue',
@@ -177,9 +174,10 @@ const styles = StyleSheet.create({
         marginBottom: 50,
 
         //iOS
+        
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.8,
+        shadowOffset: { width: 0, height: 20 },
+        shadowOpacity: 0.5,
         shadowRadius: 6,
 
         //Android
@@ -193,15 +191,17 @@ const styles = StyleSheet.create({
         fontFamily: 'AlfaSlabOne_400Regular',
 
         position: 'absolute',
-        top: 100,
     },
 
     content: {
-        top: '10%',
         paddingLeft: 30,
         paddingRight: 30,
 
         marginBottom: 30,
+
+        flex: 1,
+        backgroundColor: "white",
+        
     },
 
     formTitle: {
@@ -213,6 +213,7 @@ const styles = StyleSheet.create({
     },
 
     input: {
+        position: 'relative',
         fontFamily: "Poppins_400Regular",
         fontSize: 16,
         padding: 10,
@@ -220,9 +221,36 @@ const styles = StyleSheet.create({
 
         borderRadius: 10,
         width: "50%",
+        height: '100%',
 
         alignSelf: 'center',
         justifyContent: "center",
+        alignContent: 'center',
+        alignItems: 'center',
+
+        zIndex: 2,
+    },
+
+    inputOverflow: {
+      width: "50%",
+      backgroundColor: 'white',
+      borderRadius: 10,
+      top: 0,
+      right: 0,
+      left: 0,
+      bottom: 0,
+      position: 'absolute',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+
+      zIndex: 1,
+    },
+
+    inputChar: {
+      flex: 1,
+      fontFamily: "Poppins_400Regular",
+      fontSize: 16,
     },
 
     loginButton: {
@@ -281,9 +309,12 @@ const styles = StyleSheet.create({
         gap: 10,
         flexDirection: 'row',
         justifyContent: 'center',
+
+        height: 50,
     },
 
     form: {
+        flex: 1,
         gap: 10,
         marginBottom: 50,
     },
