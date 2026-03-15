@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Button, Platform } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Button, Platform, TouchableOpacity } from 'react-native';
 import { useRouter } from "expo-router";
+
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { getAuth } from "firebase/auth";
 
-import {Ionicons} from "@expo/vector-icons"
-import {MaterialIcons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons"
+import { MaterialIcons } from "@expo/vector-icons";
 
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const personalInfo = () => {
@@ -17,6 +19,8 @@ const personalInfo = () => {
   const [bodyWeight, setBodyWeight] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
 
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
 
   const router = useRouter();
 
@@ -25,10 +29,10 @@ const personalInfo = () => {
   const currentUser = auth.currentUser;
 
   const getCurrentUserInfo = () => {
-    if(currentUser){
+    if (currentUser) {
       const uid = currentUser.uid;
       const email = currentUser.email;
-      return {uid, email};
+      return { uid, email };
     } else {
       console.log("No user logged in");
       return undefined;
@@ -36,16 +40,16 @@ const personalInfo = () => {
   };
 
   const checkSubmit = () => {
-    if(height == '' || bodyWeight == '' || dateOfBirth == null){
+    if (height == '' || bodyWeight == '' || dateOfBirth == null) {
       alert("Empty Fields! Fill up all the required information");
     }
   }
 
   const user = getCurrentUserInfo();
-    
+
   const addPersonalInfo = async () => {
     try {
-      if(!user) return;
+      if (!user) return;
 
       await setDoc(doc(db, "users", user.uid), {
 
@@ -54,20 +58,56 @@ const personalInfo = () => {
         date_of_birth: dateOfBirth,
         email: currentUser?.email,
 
-      }, 
-      {merge: true}
-    );
+      },
+        { merge: true }
+      );
       console.log("User created: ", user.uid);
       router.push('/(tabs)/home');
-    } catch(error){
+    } catch (error) {
       console.log(error);
     }
   };
 
+  const toggleDateDisplay = () => {
+    setShowPicker(!showPicker);
+  }
+
+  const onChange = ({ type }, selectedDate: Date) => {
+    if (type == "set") {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+
+      if (Platform.OS === "android") {
+        toggleDateDisplay();
+        setDateOfBirth(formatDate(currentDate));
+      }
+    } else {
+      toggleDateDisplay();
+    }
+  };
+
+  const confirmIOSDate = () => {
+    setDateOfBirth(formatDate(date));
+    toggleDateDisplay();
+  }
+
+  const formatDate = (rawDate: Date) => {
+    let date = new Date(rawDate);
+
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+
+    return `${month}/${day}/${year}`
+  }
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={() => {
+      Keyboard.dismiss();
+      setShowPicker(false);
+    }}>
       <SafeAreaProvider>
-        <SafeAreaView style={{flex: 1, backgroundColor: "white"}}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
 
           <View style={styles.header}>
             <Text style={styles.title}>Gym Tracker</Text>
@@ -95,59 +135,84 @@ const personalInfo = () => {
                   keyboardType='numbers-and-punctuation'
                 />
               </View>
-              
-              <View style={[styles.rowWrap, {justifyContent:'space-between'}]}>
-                <Text style= {[styles.text, {marginBottom: 0,}]}>Date of Birth: </Text>
-                <TextInput
-                  style = {[styles.input, {position: 'relative', width: "60%"}]}
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  caretHidden = {true}
-                  keyboardType='number-pad'
-                  maxLength={8}
-                  onChangeText={setDateOfBirth}
-                >
-                  <View style= {styles.inputOverflow}>
-                    {'MM/DD/YYYY'.split('').map((placeholder, index, arr) => {
-                      const countDelimiters = arr.slice(0, index).filter(char => char === '/').length;
-                      const indexWithoutDelimeters = index - countDelimiters;
-                      const current = dateOfBirth[indexWithoutDelimeters]
 
-                      return (
-                        <Text key={index} style = {styles.inputChar}>
-                          {placeholder}
-                        </Text>
-                      )
-                    })}
+              <View style={[styles.rowWrap, { justifyContent: 'flex-start' }]}>
+                <Text style={[styles.text, { marginBottom: 0, }]}>Date of Birth: </Text>
+
+                {showPicker && (
+                  <View style= {styles.dateTimeContainer}>
+                    <DateTimePicker
+                      mode='date'
+                      display='spinner'
+                      value={date}
+                      onChange={onChange}
+                      style={[styles.datePicker, { position: 'relative' }]}
+                      maximumDate={new Date()}
+                    />
+                    {Platform.OS === "ios" && (
+                      <View
+                        style={{ flexDirection: 'row', gap: 20 }}
+                      >
+                        <TouchableOpacity style={[styles.cancelButton, {}]} onPress={confirmIOSDate}>
+                          <Text style={styles.buttonText}>Confirm</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[styles.cancelButton, {backgroundColor: "white", borderColor: 'blue', borderWidth: 2}]} onPress={toggleDateDisplay}>
+                          <Text style={[styles.buttonText, {color: 'blue'}]}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
-                </TextInput>
+                )}
+
+                {!showPicker && (
+                  <Pressable
+                    onPress={toggleDateDisplay}
+                    style={{ flex: 1, }}
+                  >
+                    <TextInput
+                      style={[styles.dateInput, { letterSpacing: 1, }]}
+                      value={dateOfBirth}
+                      caretHidden={true}
+                      placeholder='MM/DD/YYYY'
+                      onChangeText={setDateOfBirth}
+                      onPress={() => setShowPicker(true)}
+                      editable={false}
+                      onPressIn={toggleDateDisplay}
+                    />
+                  </Pressable>
+                )}
+
+
+
               </View>
               <Pressable
-              style={({ pressed }) => [
-                styles.signupButton,
-                {
-                  backgroundColor: pressed ? "white" : "blue",
-                  color: pressed ? "blue" : "white"
-                }
-              ]}
-              onPress={() => {
-                checkSubmit();
-                addPersonalInfo();
-                setHeight('');
-                setBodyWeight('');
-                setDateOfBirth('');
-              }}
-            >
-              {({ pressed }) => (
-                <Text style={[styles.buttonText,
-                { color: pressed ? "blue" : "white" }
-                ]}>Get Started!</Text>
-              )}
-            </Pressable>
+                style={({ pressed }) => [
+                  styles.signupButton,
+                  {
+                    backgroundColor: pressed ? "white" : "blue",
+                    color: pressed ? "blue" : "white",
+                    marginTop: 200, 
+                  }
+                ]}
+                onPress={() => {
+                  checkSubmit();
+                  addPersonalInfo();
+                  setHeight('');
+                  setBodyWeight('');
+                  setDateOfBirth('');
+                }}
+              >
+                {({ pressed }) => (
+                  <Text style={[styles.buttonText,
+                  { color: pressed ? "blue" : "white", }
+                  ]}>Get Started!</Text>
+                )}
+              </Pressable>
 
             </View>
 
-            
+
           </View>
         </SafeAreaView>
       </SafeAreaProvider>
@@ -156,168 +221,182 @@ const personalInfo = () => {
 }
 
 const styles = StyleSheet.create({
-    profileIcon: {
-        position: 'absolute',
-        right: 20,
-        top: 100,
-    },
+  profileIcon: {
+    position: 'absolute',
+    right: 20,
+    top: 100,
+  },
 
-    header: {
-        height: 180,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'blue',
+  header: {
+    height: 180,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'blue',
 
-        borderBottomLeftRadius: 15,
-        borderBottomRightRadius: 15,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
 
-        marginBottom: 50,
+    marginBottom: 50,
 
-        //iOS
-        
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 20 },
-        shadowOpacity: 0.5,
-        shadowRadius: 6,
+    //iOS
 
-        //Android
-        elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
 
-    },
+    //Android
+    elevation: 5,
 
-    title: {
-        color: "white",
-        fontSize: 30,
-        fontFamily: 'AlfaSlabOne_400Regular',
+  },
 
-        position: 'absolute',
-    },
+  title: {
+    color: "white",
+    fontSize: 30,
+    fontFamily: 'AlfaSlabOne_400Regular',
 
-    content: {
-        paddingLeft: 30,
-        paddingRight: 30,
+    position: 'absolute',
+  },
 
-        marginBottom: 30,
+  content: {
+    paddingLeft: 30,
+    paddingRight: 30,
 
-        flex: 1,
-        backgroundColor: "white",
-        
-    },
+    marginBottom: 30,
 
-    formTitle: {
-        fontFamily: "Poppins_700Bold",
-        fontSize: 20,
-        alignSelf: 'center',
+    flex: 1,
+    backgroundColor: "white",
 
-        marginBottom: 20,
-    },
+  },
 
-    input: {
-        position: 'relative',
-        fontFamily: "Poppins_400Regular",
-        fontSize: 16,
-        padding: 10,
-        borderWidth: 2,
+  formTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 20,
+    alignSelf: 'center',
 
-        borderRadius: 10,
-        width: "50%",
-        height: '100%',
+    marginBottom: 20,
+  },
 
-        alignSelf: 'center',
-        justifyContent: "center",
-        alignContent: 'center',
-        alignItems: 'center',
+  input: {
 
-        zIndex: 2,
-    },
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
+    padding: 10,
+    borderWidth: 2,
 
-    inputOverflow: {
-      width: "50%",
-      backgroundColor: 'white',
-      borderRadius: 10,
-      top: 0,
-      right: 0,
-      left: 0,
-      bottom: 0,
-      position: 'absolute',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-around',
+    borderRadius: 10,
 
-      zIndex: 1,
-    },
+    height: '100%',
 
-    inputChar: {
-      flex: 1,
-      fontFamily: "Poppins_400Regular",
-      fontSize: 16,
-    },
+    alignSelf: 'center',
+    justifyContent: "center",
+    alignContent: 'center',
+    alignItems: 'center',
+  },
 
-    loginButton: {
-        backgroundColor: "blue",
+  dateInput: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
 
-        borderColor: "blue",
-        borderWidth: 4,
+    padding: 10,
 
-        justifyContent: 'center',
-        alignItems: 'center',
+    borderWidth: 2,
+    borderRadius: 10,
 
-        alignSelf: 'center',
+    height: '100%',
+  },
 
-        borderRadius: 20,
-        width: "40%",
-        height: "18%"
-    },
+  loginButton: {
+    backgroundColor: "blue",
+
+    borderColor: "blue",
+    borderWidth: 4,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    alignSelf: 'center',
+
+    borderRadius: 20,
+    width: "40%",
+    height: "18%"
+  },
 
 
-    buttonText: {
-        color: "#FFF",
-        fontSize: 18,
-        fontFamily: "Poppins_700Bold",
-        textAlign: 'center',
-    },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontFamily: "Poppins_700Bold",
+    textAlign: 'center',
+  },
 
-    signupButton: {
-        backgroundColor: "blue",
+  signupButton: {
+    backgroundColor: "blue",
 
-        borderColor: "blue",
-        borderWidth: 2,
+    borderColor: "blue",
+    borderWidth: 2,
 
-        justifyContent: 'center',
-        alignItems: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
 
 
-        alignSelf: 'center',
+    alignSelf: 'center',
 
-        borderRadius: 20,
-        width: "40%",
-        height: "18%"
-    },
+    borderRadius: 20,
+    width: "40%",
+    height: "18%"
+  },
 
-    text: {
-        fontFamily: "Poppins_400Regular",
-        fontSize: 16,
+  text: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
 
-        alignSelf: 'center',
+    alignSelf: 'center',
 
-        textAlign: 'center',
+    textAlign: 'center',
 
-        marginBottom: 20,
-    },
+    marginBottom: 20,
+  },
 
-    rowWrap: {
-        gap: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
+  rowWrap: {
+    gap: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
 
-        height: 50,
-    },
+    height: 50,
+  },
 
-    form: {
-        flex: 1,
-        gap: 10,
-        marginBottom: 50,
-    },
+  form: {
+    flex: 1,
+    gap: 10,
+    marginBottom: 50,
+  },
+
+  dateTimeContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    zIndex: 100,
+  },
+
+  datePicker: {
+    backgroundColor: 'white',
+    marginBottom: 20,
+  },
+
+  cancelButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    width: 100,
+    borderRadius: 10,
+  },
+
 
 
 });
