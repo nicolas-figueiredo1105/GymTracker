@@ -42,6 +42,9 @@ const personalInfo = () => {
   const checkSubmit = () => {
     if (height == '' || bodyWeight == '' || dateOfBirth == null) {
       alert("Empty Fields! Fill up all the required information");
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -72,8 +75,8 @@ const personalInfo = () => {
     setShowPicker(!showPicker);
   }
 
-  const onChange = ({ type }, selectedDate: Date) => {
-    if (type == "set") {
+  const onChange = ( event: { type: string; } , selectedDate: any) => {
+    if (event.type == "set") {
       const currentDate = selectedDate;
       setDate(currentDate);
 
@@ -106,9 +109,7 @@ const personalInfo = () => {
       Keyboard.dismiss();
       setShowPicker(false);
     }}>
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-
+      <View style={{flex: 1, backgroundColor: "white"}}>
           <View style={styles.header}>
             <Text style={styles.title}>Gym Tracker</Text>
           </View>
@@ -132,7 +133,7 @@ const personalInfo = () => {
                   onChangeText={setBodyWeight}
                   placeholder="Body Weight"
                   placeholderTextColor={"#000000a9"}
-                  keyboardType='numbers-and-punctuation'
+                  keyboardType='number-pad'
                 />
               </View>
 
@@ -140,6 +141,7 @@ const personalInfo = () => {
                 <Text style={[styles.text, { marginBottom: 0, }]}>Date of Birth: </Text>
 
                 {showPicker && (
+                  
                   <View style= {styles.dateTimeContainer}>
                     <DateTimePicker
                       mode='date'
@@ -196,11 +198,13 @@ const personalInfo = () => {
                   }
                 ]}
                 onPress={() => {
-                  checkSubmit();
-                  addPersonalInfo();
-                  setHeight('');
-                  setBodyWeight('');
-                  setDateOfBirth('');
+                  if(checkSubmit()){
+                    addPersonalInfo();
+
+                    setHeight('');
+                    setBodyWeight('')
+                    setDateOfBirth('')
+                  }
                 }}
               >
                 {({ pressed }) => (
@@ -214,8 +218,7 @@ const personalInfo = () => {
 
 
           </View>
-        </SafeAreaView>
-      </SafeAreaProvider>
+        </View>
     </TouchableWithoutFeedback>
   )
 }
@@ -228,15 +231,17 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 180,
+    height: 250,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'blue',
 
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
 
-    marginBottom: 50,
+    paddingTop:60,
+
+    marginBottom: 30,
 
     //iOS
 
@@ -259,14 +264,17 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    
+    flex: 1,
     paddingLeft: 30,
     paddingRight: 30,
 
     marginBottom: 30,
+    paddingTop: 50,
 
-    flex: 1,
     backgroundColor: "white",
 
+    height: "100%"
   },
 
   formTitle: {
@@ -388,6 +396,7 @@ const styles = StyleSheet.create({
   datePicker: {
     backgroundColor: 'white',
     marginBottom: 20,
+    width: "100%",
   },
 
   cancelButton: {

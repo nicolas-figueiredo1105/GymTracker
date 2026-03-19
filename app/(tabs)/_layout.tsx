@@ -1,11 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import {Ionicons} from "@expo/vector-icons"
-import { Tabs } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const TabsLayout = () => {
   return (
+    <>
     <Tabs screenOptions={{
         tabBarActiveTintColor: "blue",
         tabBarInactiveTintColor: "white",
@@ -43,6 +44,7 @@ const TabsLayout = () => {
         />
         
     </Tabs>
+    </>
   );
 };
 

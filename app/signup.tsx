@@ -29,6 +29,7 @@ const SignUp = () => {
             router.push('/personalInfo');
         } catch (error) {
             console.log(error)
+            alert("Empty fields! Please fill up all the required information.")
         }
     };
 

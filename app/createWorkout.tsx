@@ -1,22 +1,22 @@
 import { Link } from "expo-router";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import {Ionicons} from "@expo/vector-icons"
 import {MaterialIcons} from "@expo/vector-icons";
-import fontsLoaded from '../_layout'
+import fontsLoaded from './_layout'
 
-import { auth, db } from "../../firebase";
+import { auth, db } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
   
 
 
-export default function Workout() {
+export default function CreateWorkout() {
 
   const auth = getAuth();
 
@@ -113,20 +113,24 @@ export default function Workout() {
 
   return (
     <SafeAreaView style = {styles.screen}>
-      <View style={styles.header}>
-        <FontAwesome5 name="dumbbell" size={20} style={styles.iconLogo} />
-        <Text style = {styles.title}>Gym Tracker</Text>
-        <Ionicons name="flame" size={25}/>
-        <Text style = {[styles.title, {marginRight: 15,}]}>{streak}</Text>
-        <MaterialIcons name="account-circle" size={30}/>
-      </View>
-      <View style = {styles.content}>
-        <Text style = {styles.title}>My Workouts</Text>
-        <Pressable style={styles.addButton}
-          onPress={() => router.push("/createWorkout")}
+      <View style={{width: 100, height: 50,}}>
+        <Pressable style={{flex: 1, flexDirection: 'row', alignItems: 'center',}}
+          onPress={() => router.push("/(tabs)/workout")}
+          
         >
-          <Ionicons name="add" size={60} color={"white"}/>
-        </Pressable>
+          <Ionicons name="chevron-back" size={30} color={"blue"}/>
+          <Text style={{color: "blue", fontFamily:"Poppins_700Bold"}}>Cancel</Text>
+      </Pressable>
+      </View>
+      
+      <View style = {styles.content}>
+        <View style={[styles.form]}>
+          <TextInput
+          placeholder="Workout Title"
+          style={[styles.input]}
+          />
+        </View>
+        
       </View>
     </SafeAreaView>
   );
@@ -190,7 +194,8 @@ const styles = StyleSheet.create({
     paddingRight: 30,
   },
 
-  dashBoard: {
+  form: {
+    
     
   },
 
@@ -222,5 +227,19 @@ const styles = StyleSheet.create({
     right: 60,
     bottom: 0,
   },
+
+  input: {
+    flex: 1,
+    borderBottomWidth: 3,
+    borderColor: "blue",
+
+    backgroundColor: "#d4d4d4bd",
+
+    width: 300,
+
+    padding: 10,
+
+    color: "blue",
+  }
 });
 
