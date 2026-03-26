@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
 
     position: 'absolute',
 
-    right: 60,
+    right: 30,
     bottom: 0,
   },
 });

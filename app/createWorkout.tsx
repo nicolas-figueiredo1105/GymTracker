@@ -1,18 +1,14 @@
-import { Link } from "expo-router";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import {Ionicons} from "@expo/vector-icons"
-import {MaterialIcons} from "@expo/vector-icons";
-import fontsLoaded from './_layout'
+import { Ionicons } from "@expo/vector-icons";
 
-import { auth, db } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { db } from "../firebase";
   
 
 
@@ -20,28 +16,15 @@ export default function CreateWorkout() {
 
   const auth = getAuth();
 
-  const [firstName, setFirstName] = useState('');
-  const [streak, setStreak] = useState(0);
+  const [workoutTitle, setWorkoutTitle] = useState('');
+  const [workoutSet, setWorkoutSet] = useState(0);
+  const [workoutRep, setWorkoutRep] = useState(0);
+
+  const [exercises, setExercises] = useState<string[]>([]);
+  const [sets, setSets] = useState<string[]>([]);
+  const [reps, setReps] = useState<string[]>([]);
 
   const router = useRouter();
-
-  //Setters------------------------------------------------
-  useEffect(() => {
-    const loadUser = async () => {
-      const firstName = await getFirstName();
-      const streak = await getStreak();
-
-      if(firstName) {
-        setFirstName(firstName);
-      }
-
-      if(streak) {
-        setStreak(streak);
-      }
-
-    };
-    loadUser();
-  }, []);
 
   //User Data retrieval-----------------------------------
   const getUserData = async () => {
@@ -83,37 +66,29 @@ export default function CreateWorkout() {
       return null;
     }
   };
+  
 
-  //Getters---------------------------------------------
-  const getFirstName = async () => {
-    const userData = await getUserData();
-    if(userData != null){
-      return userData?.first_name;
-    }
-    return;
+  const countExercise = () => {
+    let count = 1;
+    let str = "Exercise " + count;
+
+    count++;
+
+    return str;
   }
 
-  const getStreak = async () => {
-    const userData = await getUserData();
-    if(userData != null){
-      return userData?.streak;
-    }
-    return;
+  const createNewExercise = () => {
+    setExercises(prev => [...prev, ""]);
   }
 
-  const getWorkoutTitle = async () => {
-    const workoutData = await getUserWorkouts();
-
-    if(workoutData != null){
-      return workoutData?.title;
-    }
-    return;
+  const createNewSet = () => {
+    setSets(prev => [...prev, ""]);
   }
-
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <SafeAreaView style = {styles.screen}>
-      <View style={{width: 100, height: 50,}}>
+      <View style={{width: 100, height: 50, marginBottom: 30,}}>
         <Pressable style={{flex: 1, flexDirection: 'row', alignItems: 'center',}}
           onPress={() => router.push("/(tabs)/workout")}
           
@@ -127,12 +102,54 @@ export default function CreateWorkout() {
         <View style={[styles.form]}>
           <TextInput
           placeholder="Workout Title"
-          style={[styles.input]}
+          style={[styles.input, {marginBottom: 30, minHeight: 60}]}
           />
+          <ScrollView>
+            <View>
+              <TextInput
+                style={[styles.input, {minHeight: 45,}]}
+                placeholder="Exercise 1"
+              />
+              <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center",}}>
+                <Pressable>
+                  <Ionicons name="add" size={30} color={"blue"}/>
+                </Pressable>
+                <TextInput
+                  style={[styles.input, {marginBottom: 0,}]}
+
+                />
+              </View>
+            </View>
+            
+            
+
+            {exercises.map((ex, index) => (
+              <TextInput
+                key={index}
+                placeholder={`Exercise ${index + 2}`}
+                style={[styles.input, {minHeight: 45,}]}
+              />
+            ))}
+          </ScrollView>
         </View>
         
+      
+        <View style={{ flexDirection: "row", justifyContent:"center", alignItems: "center", width: "100%", gap: 10,}}>
+          <Pressable style={styles.createButton}
+           
+          >
+            <Text style={[styles.text, {color: "white"}]}>Create Workout</Text>
+          </Pressable>
+
+          <Pressable style={[styles.createButton, {backgroundColor: "white", borderColor: "blue", borderWidth: 3}]}
+            onPress={createNewExercise}
+          >
+            <Text style={[styles.text, {color: "blue"}]}>Create Exercise</Text>
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -195,13 +212,15 @@ const styles = StyleSheet.create({
   },
 
   form: {
-    
+    flex: 1,
     
   },
 
-  dashBoardText: {
+  text: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 20,
+    fontSize: 16,
+
+    textAlign: "center",
   },
 
   workoutCard: {
@@ -209,23 +228,20 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: 150,
+    
   },
 
-  addButton: {
+  createButton: {
     backgroundColor: "blue",
-    width: 60,
+    width: 120,
     height: 60,
 
-    borderRadius: 60,
+    borderRadius: 10,
 
+    
     justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center',
 
-    position: 'absolute',
-
-    right: 60,
-    bottom: 0,
+    marginTop: 20,
   },
 
   input: {
@@ -233,13 +249,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderColor: "blue",
 
-    backgroundColor: "#d4d4d4bd",
+    backgroundColor: "#ecececbd",
 
-    width: 300,
+    maxHeight: 50,
 
     padding: 10,
 
+    marginBottom: 20,
+
     color: "blue",
-  }
+
+    fontSize: 20,
+    fontFamily: "Poppins_700Bold",
+  },
+
+
 });
 
