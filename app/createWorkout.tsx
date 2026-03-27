@@ -66,16 +66,7 @@ export default function CreateWorkout() {
       return null;
     }
   };
-  
 
-  const countExercise = () => {
-    let count = 1;
-    let str = "Exercise " + count;
-
-    count++;
-
-    return str;
-  }
 
   const createNewExercise = () => {
     setExercises(prev => [...prev, ""]);
@@ -102,6 +93,7 @@ export default function CreateWorkout() {
         <View style={[styles.form]}>
           <TextInput
           placeholder="Workout Title"
+          placeholderTextColor="#0004ff7a"
           style={[styles.input, {marginBottom: 30, minHeight: 60}]}
           />
           <ScrollView>
@@ -109,26 +101,48 @@ export default function CreateWorkout() {
               <TextInput
                 style={[styles.input, {minHeight: 45,}]}
                 placeholder="Exercise 1"
+                placeholderTextColor="#0004ff7a"
               />
-              <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center",}}>
-                <Pressable>
-                  <Ionicons name="add" size={30} color={"blue"}/>
-                </Pressable>
+
+              <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center", marginBottom: 20, gap: 10,}}>
+                <Text style={[styles.text, {color: "blue"}]}>Set(s)</Text>
                 <TextInput
                   style={[styles.input, {marginBottom: 0,}]}
+                  keyboardType="number-pad"
+                />
 
+                <Text style={[styles.text, {width: 60, color: "blue"}]}>Initial Weight (lbs)</Text>
+                <TextInput
+                  style={[styles.input, {marginBottom: 0,}]}
+                  keyboardType="number-pad"
                 />
               </View>
             </View>
-            
-            
+
 
             {exercises.map((ex, index) => (
-              <TextInput
-                key={index}
-                placeholder={`Exercise ${index + 2}`}
-                style={[styles.input, {minHeight: 45,}]}
-              />
+              <>
+                <TextInput
+                  key={index}
+                  placeholder={`Exercise ${index + 2}`}
+                  placeholderTextColor="#0004ff7a"
+                  style={[styles.input, {minHeight: 45,}]}
+                />
+
+                <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center", marginBottom: 20, gap: 10,}}>
+                <Text style={[styles.text, {color: "blue"}]}>Set(s)</Text>
+                <TextInput
+                  style={[styles.input, {marginBottom: 0,}]}
+                  keyboardType="number-pad"
+                />
+
+                <Text style={[styles.text, {width: 60, color: "blue"}]}>Initial Weight (lbs)</Text>
+                <TextInput
+                  style={[styles.input, {marginBottom: 0,}]}
+                  keyboardType="number-pad"
+                />
+              </View>
+              </>
             ))}
           </ScrollView>
         </View>
