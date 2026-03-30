@@ -15,7 +15,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 const personalInfo = () => {
 
-  const [height, setHeight] = useState('');
+  const [heightFt, setHeightFt] = useState('');
+  const [heightIn, setHeightIn] = useState('');
   const [bodyWeight, setBodyWeight] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
 
@@ -40,7 +41,7 @@ const personalInfo = () => {
   };
 
   const checkSubmit = () => {
-    if (height == '' || bodyWeight == '' || dateOfBirth == null) {
+    if (heightFt == '' || heightIn == '' || bodyWeight == '' || dateOfBirth == null) {
       alert("Empty Fields! Fill up all the required information");
       return false;
     } else {
@@ -56,7 +57,7 @@ const personalInfo = () => {
 
       await setDoc(doc(db, "users", user.uid), {
 
-        height: height,
+        height: formatHeight(heightFt, heightIn),
         body_weight: bodyWeight,
         date_of_birth: dateOfBirth,
         email: currentUser?.email,
@@ -104,6 +105,10 @@ const personalInfo = () => {
     return `${month}/${day}/${year}`
   }
 
+  const formatHeight = (heightF: string, heightI: string) => {
+    return `${heightF}'${heightI}"`;
+  }
+
   return (
     <TouchableWithoutFeedback onPress={() => {
       Keyboard.dismiss();
@@ -118,15 +123,25 @@ const personalInfo = () => {
             <Text style={styles.formTitle}>Sign Up</Text>
 
             <View style={[styles.form]}>
-              <View style={styles.rowWrap}>
+              <View style={[styles.rowWrap, {alignItems: 'center'}]}>
+                <Text>Ft:</Text>
                 <TextInput
-                  style={[styles.input, { flex: 1 }]}
-                  value={height}
-                  onChangeText={setHeight}
-                  placeholder="Height"
+                  style={[styles.input, { flex: 1, maxWidth: "15%" }]}
+                  value={heightFt}
+                  onChangeText={setHeightFt}
                   placeholderTextColor={"#000000a9"}
-                  keyboardType='numeric'
+                  keyboardType='number-pad'
                 />
+
+                <Text>In:</Text>
+                <TextInput
+                  style={[styles.input, { flex: 1, maxWidth: "15%" }]}
+                  value={heightIn}
+                  onChangeText={setHeightIn}
+                  placeholderTextColor={"#000000a9"}
+                  keyboardType='number-pad'
+                />
+
                 <TextInput
                   style={[styles.input, { flex: 1 }]}
                   value={bodyWeight}
@@ -201,7 +216,8 @@ const personalInfo = () => {
                   if(checkSubmit()){
                     addPersonalInfo();
 
-                    setHeight('');
+                    setHeightFt('');
+                    setHeightIn('');
                     setBodyWeight('')
                     setDateOfBirth('')
                   }
@@ -231,17 +247,17 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 250,
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'blue',
 
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
 
     paddingTop:60,
 
-    marginBottom: 30,
+    marginBottom: 50,
 
     //iOS
 

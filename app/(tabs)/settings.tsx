@@ -89,7 +89,7 @@ export default function Settings() {
       </View>
       <View style = {styles.content}>
         <View style={styles.dashBoard}>
-          <Text style = {styles.dashBoardText}>Settings</Text>
+          <Text style = {styles.title}>Settings</Text>
           <Pressable
             onPress={() => router.push("/login")}
           >

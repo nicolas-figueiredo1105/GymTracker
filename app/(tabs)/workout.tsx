@@ -1,18 +1,15 @@
-import { Link } from "expo-router";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import {Ionicons} from "@expo/vector-icons"
-import {MaterialIcons} from "@expo/vector-icons";
-import fontsLoaded from '../_layout'
 
-import { auth, db } from "../../firebase";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { db } from "../../firebase";
   
 
 
@@ -22,23 +19,28 @@ export default function Workout() {
 
   const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
+  const [workouts, setWorkouts] = useState<any>(null);
 
   const router = useRouter();
 
   //Setters------------------------------------------------
   useEffect(() => {
     const loadUser = async () => {
-      const firstName = await getFirstName();
-      const streak = await getStreak();
+      const firstNameVal = await getFirstName();
+      const streakVal = await getStreak();
+      const workoutsData = await getUserWorkouts();
 
-      if(firstName) {
-        setFirstName(firstName);
+      if (firstNameVal) {
+        setFirstName(firstNameVal);
       }
 
-      if(streak) {
-        setStreak(streak);
+      if (streakVal !== undefined) {
+        setStreak(streakVal);
       }
 
+      if (workoutsData) {
+        setWorkouts(workoutsData);
+      }
     };
     loadUser();
   }, []);
@@ -68,19 +70,22 @@ export default function Workout() {
   const getUserWorkouts = async () => {
     const user = auth.currentUser;
 
-    if(!user){
+    if (!user) {
       console.log("No user logged in.");
       return;
     }
 
-    const workoutRef = doc(db, "workouts", user.uid);
-    const workoutSnap = await getDoc(workoutRef);
+    const workoutRef = collection(db, "users", user.uid, "workouts");
+    const workoutSnap = await getDocs(workoutRef);
 
-    if(workoutSnap.exists()){
-      return workoutSnap.data();
+    if (!workoutSnap.empty) {
+      return workoutSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
     } else {
       console.log("No workouts found for this user");
-      return null;
+      return [];
     }
   };
 
@@ -101,15 +106,34 @@ export default function Workout() {
     return;
   }
 
-  const getWorkoutTitle = async () => {
+  const getWorkoutTitle = async (index: number) => {
     const workoutData = await getUserWorkouts();
 
-    if(workoutData != null){
-      return workoutData?.title;
+    if(workoutData && workoutData.length > 0){
+      return (workoutData[index] as any).title;
     }
-    return;
+    return null;
   }
 
+    const getWorkoutName = async (index: number) => {
+    const workoutData = await getUserWorkouts();
+
+    if(workoutData && workoutData.length > 0){
+      return (workoutData[index] as any).name;
+    }
+    return null;
+  }
+
+  async function getWorkoutLength () : Promise<number> {
+      const workouts = await getUserWorkouts();
+
+      if(workouts != null){
+        return workouts?.length;
+      } else {
+        return -1;
+      }
+      
+    }
 
   return (
     <SafeAreaView style = {styles.screen}>
@@ -121,9 +145,27 @@ export default function Workout() {
         <MaterialIcons name="account-circle" size={30}/>
       </View>
       <View style = {styles.content}>
-        <Text style = {styles.title}>My Workouts</Text>
+        <Text style = {[styles.title, {marginBottom: 25,}]}>My Workouts</Text>
+        <ScrollView>
+        {workouts && workouts.length > 0 ? (
+          workouts.map((workout: any, index : number) => (
+
+              <View key={workout.id} style={index % 2 === 0 ? styles.workoutCardBright : styles.workoutCardDark}>
+                <Text style={index % 2 === 0 ? styles.titleBright : styles.titleDark}>{workout.title}</Text>
+                <View style={{paddingVertical: 10, maxHeight: 100}}>
+                {workout.exercises && workout.exercises.map((ex: any, i : number) => (
+                  <Text key={i} style={index % 2 === 0 ? styles.textBright : styles.textDark}>&gt; {ex.name}</Text>
+                ))}
+                </View>
+              </View>
+           
+          ))
+        ) : (
+          <Text>No workouts yet</Text>
+        )}
+        </ScrollView>
         <Pressable style={styles.addButton}
-          onPress={() => router.push("/createWorkout")}
+          onPress={() => router.push("/workout/createWorkout")}
         >
           <Ionicons name="add" size={60} color={"white"}/>
         </Pressable>
@@ -199,12 +241,66 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 
-  workoutCard: {
-    backgroundColor: "blue",
+  workoutCardBright: {
+    backgroundColor: "white",
     flex: 1,
     width: "100%",
     height: 150,
+
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    
+    marginBottom: 30,
+
+    borderColor: "blue",
+    borderWidth: 5,
+    borderRadius: 20,
+
+    overflow: "hidden",
   },
+
+  workoutCardDark: {
+    backgroundColor: "blue",
+
+    flex: 1,
+    width: "100%",
+    height: 150,
+
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    
+    marginBottom: 30,
+
+    borderRadius: 20,
+
+    
+  },
+
+  titleDark: {
+    color: "white",
+    fontSize: 20,
+    fontFamily: 'AlfaSlabOne_400Regular',
+
+  },
+
+  titleBright: {
+    color: "black",
+    fontSize: 20,
+    fontFamily: 'AlfaSlabOne_400Regular',
+  },
+
+  textDark : {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+  },
+
+  textBright: {
+    color: "black",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+  },
+
 
   addButton: {
     backgroundColor: "blue",

@@ -88,7 +88,7 @@ export default function Home() {
       </View>
       <View style = {styles.content}>
         <View style={styles.dashBoard}>
-          <Text style = {styles.dashBoardText}>Hello {firstName},</Text>
+          <Text style = {styles.title}>Hello {firstName},</Text>
         </View>
       </View>
     </SafeAreaView>
