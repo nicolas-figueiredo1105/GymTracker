@@ -1,24 +1,20 @@
 import { useRouter } from "expo-router";
-import React ,{ useRef } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
 
-
-
+import AnimatedButton from "@/constants/AnimatedButton";
 export default function Workout() {
 
   const auth = getAuth();
 
-  const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
   const [workouts, setWorkouts] = useState<any>(null);
 
@@ -27,139 +23,79 @@ export default function Workout() {
   //Setters------------------------------------------------
   useEffect(() => {
     const loadUser = async () => {
-      const firstNameVal = await getFirstName();
-      const streakVal = await getStreak();
-      const workoutsData = await getUserWorkouts();
+      const user = auth.currentUser;
 
-      if (firstNameVal) {
-        setFirstName(firstNameVal);
+      if (!user) {
+        console.log("No user logged in.");
+        return;
       }
 
-      if (streakVal !== undefined) {
-        setStreak(streakVal);
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        console.log("User data:", userData);
+        if (userData?.streak !== undefined) {
+          setStreak(userData.streak);
+        }
+      } else {
+        console.log("No information found for this user");
       }
 
-      if (workoutsData) {
-        setWorkouts(workoutsData);
+      const workoutRef = collection(db, "users", user.uid, "workouts");
+      const workoutSnap = await getDocs(workoutRef);
+
+      const workoutsData = workoutSnap.empty
+        ? []
+        : workoutSnap.docs.map((workoutDoc) => ({
+            id: workoutDoc.id,
+            ...workoutDoc.data(),
+          }));
+
+      if (workoutSnap.empty) {
+        console.log("No workouts found for this user");
       }
+
+      setWorkouts(workoutsData);
     };
+
     loadUser();
-  }, []);
-
-  //User Data retrieval-----------------------------------
-  const getUserData = async () => {
-    const user = auth.currentUser;
-
-    if(!user){
-      console.log("No user logged in.");
-      return;
-    }
-
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if(userSnap.exists()){
-      console.log("User data:" , userSnap.data());
-      return userSnap.data();
-    } else {
-      console.log("No information found for this user");
-      return null;
-    }
-  };
-
-  //Workout retrieval-------------------------------------
-  const getUserWorkouts = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.log("No user logged in.");
-      return;
-    }
-
-    const workoutRef = collection(db, "users", user.uid, "workouts");
-    const workoutSnap = await getDocs(workoutRef);
-
-    if (!workoutSnap.empty) {
-      return workoutSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    } else {
-      console.log("No workouts found for this user");
-      return [];
-    }
-  };
-
-  //Getters---------------------------------------------
-  const getFirstName = async () => {
-    const userData = await getUserData();
-    if(userData != null){
-      return userData?.first_name;
-    }
-    return;
-  }
-
-  const getStreak = async () => {
-    const userData = await getUserData();
-    if(userData != null){
-      return userData?.streak;
-    }
-    return;
-  }
-
-//Animation---------------------------------------
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return{
-      transform: [{ scale: scale.value}],
-    };
-  });
+  }, [auth]);
 
   return (
     <SafeAreaView style = {styles.screen}>
       <View style={styles.header}>
-        <FontAwesome5 name="dumbbell" size={20} style={styles.iconLogo} />
+        <FontAwesome5 name="dumbbell" size={20} style={styles.iconLogo}/>
         <Text style = {styles.title}>Gym Tracker</Text>
         <Ionicons name="flame" size={25}/>
         <Text style = {[styles.title, {marginRight: 15,}]}>{streak}</Text>
-        <MaterialIcons name="account-circle" size={30}/>
+        <MaterialIcons name="account-circle" size={30} onPress={() => router.replace("/(tabs)/settings")}/>
       </View>
       <View style = {styles.content}>
         <Text style = {[styles.title, {marginBottom: 25,}]}>My Workouts</Text>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        
         {workouts && workouts.length > 0 ? (
           workouts.map((workout: any, index : number) => (
-            <Animated.View
-              style={animatedStyle}
-            >
-              <Pressable key={workout.id} style={index % 2 === 0 ? styles.workoutCardBright : styles.workoutCardDark} 
-                onPressIn={() => { 
-                  scale.value = withSpring(0.90)
-                }}  
-                onPressOut={() => {
-                  scale.value = withSpring(1.00)
-                }}
-              >
-                
-                <View>
-                  <Text style={index % 2 === 0 ? styles.titleBright : styles.titleDark}>{workout.title}</Text>
-                  <View style={{paddingVertical: 10, maxHeight: 80, overflow:"hidden"}}>
-                  {workout.exercises && workout.exercises.map((ex: any, i : number) => (
-                    <Text key={i} style={index % 2 === 0 ? styles.textBright : styles.textDark}>&gt; {ex.name} ({ex.sets} sets)</Text>
-                  ))}
-                  </View>
-                </View>
-                
-              </Pressable>
-           </Animated.View>
+          <ScrollView showsVerticalScrollIndicator={true} style={{flex: 1,}}>
+            <AnimatedButton
+              key={workout.id}
+              title={workout.title}
+              index={index}
+              workout={workout}
+            />
+            </ScrollView>
           ))
         ) : (
-          <Text>No workouts yet</Text>
+          <View style={[{ flex: 1, alignItems:"center", justifyContent: "center", opacity: 0.3, paddingBottom: 60}]}>
+            <FontAwesome5 name="dumbbell" size={60} style={[styles.iconLogo, {marginRight: 0}]}/>
+            <Text style={[styles.title, {marginRight: 0}]}>GymTracker</Text>
+            <Text>No workouts yet</Text>
+          </View>
         )}
-        </ScrollView>
+        
         <Pressable style={styles.addButton}
-          onPress={() => router.push("/workout/createWorkout")}
+          onPress={() => router.push("../workout/createWorkout")}
         >
           <Ionicons name="add" size={60} color={"white"}/>
         </Pressable>

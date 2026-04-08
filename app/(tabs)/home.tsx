@@ -1,24 +1,22 @@
-import { Link } from "expo-router";
-import { Stack } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import {Ionicons} from "@expo/vector-icons"
-import {MaterialIcons} from "@expo/vector-icons";
-import fontsLoaded from '../_layout'
 
-import { auth, db } from "../../firebase";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { db } from "../../firebase";
   
 
 
 export default function Home() {
 
   const auth = getAuth();
+  const router = useRouter();
 
   const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
@@ -84,7 +82,7 @@ export default function Home() {
         <Text style = {styles.title}>Gym Tracker</Text>
         <Ionicons name="flame" size={25}/>
         <Text style = {[styles.title, {marginRight: 15,}]}>{streak}</Text>
-        <MaterialIcons name="account-circle" size={30}/>
+        <MaterialIcons name="account-circle" size={30} onPress={() => router.replace("/(tabs)/settings")}/>
       </View>
       <View style = {styles.content}>
         <View style={styles.dashBoard}>

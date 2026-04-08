@@ -23,80 +23,47 @@ export default function CreateWorkout() {
 
   const router = useRouter();
 
-  //User Data retrieval-----------------------------------
-  const getUserData = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.log("No user logged in.");
-      return;
-    }
-
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      console.log("User data:", userSnap.data());
-      return userSnap.data();
-    } else {
-      console.log("No information found for this user");
-      return null;
-    }
-  };
-
-  //Workout retrieval-------------------------------------
-  const getUserWorkouts = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.log("No user logged in.");
-      return;
-    }
-
-    const workoutRef = collection(db, "users", user.uid, "workouts");
-    const workoutSnap = await getDocs(workoutRef);
-
-    if (!workoutSnap.empty) {
-      return workoutSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    } else {
-      console.log("No workouts found for this user");
-      return [];
-    }
-  };
-
 
   const createNewExercise = () => {
     setExercises(prev => [...prev, ""]);
   }
 
   const saveWorkout = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const ref = collection(db, "users", user.uid, "workouts");
-
-      const workout = {
-        title: workoutTitle,
-        exercises: exercises.map((exercise, index) => ({
-          name: exercise,
-          sets: sets[index] || "",
-          initialWeight: initialWeight[index] || "",
-        })),
-        createdAt: new Date(),
-      };
-
-      await addDoc(ref, workout);
-
-      console.log("Workout created.");
-      router.push('/(tabs)/home');
-    } catch (error) {
-      console.log(error);
+    if (!isEmpty()) {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const ref = collection(db, "users", user.uid, "workouts");
+  
+        const workout = {
+          title: workoutTitle,
+          exercises: exercises.map((exercise, index) => ({
+            name: exercise,
+            sets: sets[index] || "",
+            initialWeight: initialWeight[index] || "",
+          })),
+          createdAt: new Date(),
+        };
+  
+        await addDoc(ref, workout);
+  
+        console.log("Workout created.");
+        router.back();
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      alert("Empty workout title and/or only one exercise logged. Insert title and add more than one exercise.")
     }
   };
+
+  const isEmpty = () => {
+    if(exercises.length <= 1 && workoutTitle.trim() === ""){
+      return true;
+    }
+    return false;
+  }
 
 
   return (
@@ -110,7 +77,7 @@ export default function CreateWorkout() {
         >
           <View style={{ width: 100, height: 50, marginBottom: 30, }}>
             <Pressable style={{ flex: 1, flexDirection: 'row', alignItems: 'center', }}
-              onPress={() => router.push("/(tabs)/workout")}
+              onPress={() => router.back()}
             >
               <Ionicons name="chevron-back" size={30} color={"blue"} />
               <Text style={{ color: "blue", fontFamily: "Poppins_700Bold" }}>Cancel</Text>

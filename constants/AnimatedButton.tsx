@@ -1,123 +1,128 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated'
-import React, { useRef, useState } from 'react'
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
-import { getAuth } from "firebase/auth";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { useRouter } from "expo-router";
+
+const router = useRouter();
+
+type Exercise = {
+  name?: string;
+  sets?: number;
+};
+
+type Workout = {
+  id: string;
+  title?: string;
+  exercises?: Exercise[];
+};
 
 type Props = {
-    title: string;
-    sets: string;
-    onPress: () => void;
-}
+  title: string;
+  index: number;
+  workout: Workout;
+};
 
-const [workouts, setWorkouts] = useState<any>(null);
-const auth = getAuth();
+const AnimatedButton = ({ title, index, workout}: Props) => {
+  const scale = useSharedValue(1);
+  const isBright = index % 2 === 0;
 
-  //Workout retrieval-------------------------------------
-  const getUserWorkouts = async () => {
-    const user = auth.currentUser;
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
-    if (!user) {
-      console.log("No user logged in.");
-      return;
-    }
-
-    const workoutRef = collection(db, "users", user.uid, "workouts");
-    const workoutSnap = await getDocs(workoutRef);
-
-    if (!workoutSnap.empty) {
-      return workoutSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    } else {
-      console.log("No workouts found for this user");
-      return [];
-    }
-  };
-
-
-const AnimatedButton = ({ title, sets, onPress }: Props) => {
-    const scale = useSharedValue(1);
-
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: scale.value }],
-        };
-    });
-
-    return (
-        <Animated.View>
-            <Pressable
-                onPressIn={() => {
-                    scale.value = withSpring(0.98);
-                }}
-
-                onPressOut={() => {
-                    scale.value = withSpring(1.0);
-                }}
-            >
-                <Text>{title}</Text>
-            </Pressable>
-        </Animated.View>
-    )
-}
+  return (
+    <Animated.View
+      style={[
+        styles.cardBase,
+        isBright ? styles.workoutCardBright : styles.workoutCardDark,
+        animatedStyle,
+      ]}
+    >
+      <Pressable
+        style={styles.pressable}
+        onPress={() => router.push({
+          pathname: "/workout/startWorkout",
+          params: { workoutId : workout.id}
+        })}
+        onPressIn={() => {
+          scale.value = withSpring(0.92);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1);
+        }}
+      >
+        <View>
+          <Text style={isBright ? styles.titleBright : styles.titleDark}>
+            {title}
+          </Text>
+          <View style={styles.exerciseList}>
+            {workout.exercises?.map((exercise, exerciseIndex) => (
+              <Text
+                key={`${workout.id}-${exerciseIndex}`}
+                style={isBright ? styles.textBright : styles.textDark}
+              >
+                {">"} {exercise.name} ({exercise.sets} sets)
+              </Text>
+            ))}
+          </View>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+};
 
 export default AnimatedButton;
 
 const styles = StyleSheet.create({
-    workoutCardBright: {
-    backgroundColor: "white",
-    flex: 1,
+  cardBase: {
     width: "100%",
     height: 150,
+    marginBottom: 30,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
 
+  pressable: {
+    flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 30,
+    justifyContent: "space-between",
+  },
 
-    marginBottom: 30,
+  exerciseList: {
+    paddingVertical: 10,
+    maxHeight: 80,
+    overflow: "hidden",
+  },
 
+  workoutCardBright: {
+    backgroundColor: "white",
     borderColor: "blue",
     borderWidth: 5,
-    borderRadius: 20,
-
-    overflow: "hidden",
-
   },
 
   workoutCardDark: {
     backgroundColor: "blue",
-
-    flex: 1,
-    width: "100%",
-    height: 150,
-
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-
-    marginBottom: 30,
-
-    borderRadius: 20,
-
-    overflow: "hidden",
   },
 
   titleDark: {
     color: "white",
     fontSize: 20,
-    fontFamily: 'AlfaSlabOne_400Regular',
-
+    fontFamily: "AlfaSlabOne_400Regular",
   },
 
   titleBright: {
     color: "black",
     fontSize: 20,
-    fontFamily: 'AlfaSlabOne_400Regular',
+    fontFamily: "AlfaSlabOne_400Regular",
   },
 
-  textDark : {
+  textDark: {
     color: "white",
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
@@ -128,4 +133,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
   },
-})
+});
