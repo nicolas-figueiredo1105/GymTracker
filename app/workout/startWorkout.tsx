@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +20,24 @@ export default function StartWorkout() {
 
     const [workout, setWorkout] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+    useEffect(() => {
+        if(!startTime) return;
+
+        const interval = setInterval(() => {
+            const secondsPassed = Math.floor((Date.now() - startTime) / 1000);
+            setElapsedSeconds(secondsPassed);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startTime]);
+
+    const startTimer = () => {
+        setStartTime(Date.now());
+    }
 
     const router = useRouter();
 
@@ -45,7 +63,14 @@ export default function StartWorkout() {
 
         }
         getWorkout();
-    }, [workoutId])
+    }, [workoutId]);
+
+    const getExercise = ((index: number) => {
+        workout.exercises.map((ex: any) => {
+            return ex[index];
+        })
+    })
+
 
 
     return (
@@ -66,9 +91,18 @@ export default function StartWorkout() {
                         </Pressable>
                     </View>
 
-                    <Text style={styles.title}>
-                        {loading ? "Loading..." : workout?.title ?? "Problem Loading Workout"}
-                    </Text>
+                    <View style={[styles.header, {justifyContent:"center", marginRight: 0}]}>
+                        <Text style={[styles.title, {marginRight: 0}]}>
+                            {loading ? "Loading..." : workout?.title ?? "Problem Loading Workout"}
+                        </Text>
+                        <Pressable onPress={startTimer} style={[styles.createButton, {paddingHorizontal: 10,}]}>
+                                <Text style={[styles.text, {color: "white"}]}>Start Workout</Text>
+                            </Pressable>
+                            <Text>{elapsedSeconds}</Text>
+                    </View>
+                    
+
+
 
                 </KeyboardAvoidingView>
             </SafeAreaView>
@@ -90,12 +124,8 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        flexDirection: 'row',
-
         height: 100,
         alignItems: 'center',
-
-        textAlign: 'left',
 
         marginBottom: 50,
         marginHorizontal: 20,

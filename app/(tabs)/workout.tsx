@@ -10,7 +10,7 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
 
-import AnimatedButton from "@/constants/AnimatedButton";
+import AnimatedWorkoutButton from "@/constants/AnimatedButton";
 export default function Workout() {
 
   const auth = getAuth();
@@ -78,7 +78,7 @@ export default function Workout() {
         {workouts && workouts.length > 0 ? (
           workouts.map((workout: any, index : number) => (
           <ScrollView showsVerticalScrollIndicator={true} style={{flex: 1,}}>
-            <AnimatedButton
+            <AnimatedWorkoutButton
               key={workout.id}
               title={workout.title}
               index={index}

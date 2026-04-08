@@ -27,7 +27,7 @@ type Props = {
   workout: Workout;
 };
 
-const AnimatedButton = ({ title, index, workout}: Props) => {
+const AnimatedWorkoutButton = ({ title, index, workout}: Props) => {
   const scale = useSharedValue(1);
   const isBright = index % 2 === 0;
 
@@ -76,7 +76,7 @@ const AnimatedButton = ({ title, index, workout}: Props) => {
   );
 };
 
-export default AnimatedButton;
+export default AnimatedWorkoutButton;
 
 const styles = StyleSheet.create({
   cardBase: {
