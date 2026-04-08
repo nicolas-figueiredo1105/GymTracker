@@ -3,8 +3,6 @@ import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins'
 import { Stack } from "expo-router";
 import React from "react";
 
-import { useLocalSearchParams } from "expo-router";
-
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
       AlfaSlabOne_400Regular,
@@ -12,16 +10,6 @@ export default function RootLayout() {
       Poppins_700Bold
     });
 
-  const { from } = useLocalSearchParams();
-
-  const checkLastPage = () => {
-    if(from === "login" || from ==="signup"){
-      return true;
-    }
-    return false;
-  }
-
-  const isLogSign = checkLastPage();
 
   return (
     <Stack screenOptions={{ headerShown: false,}}>

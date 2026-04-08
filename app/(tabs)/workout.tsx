@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
-import React from "react";
+import React ,{ useRef } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -10,7 +11,7 @@ import { getAuth } from "firebase/auth";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
-  
+
 
 
 export default function Workout() {
@@ -106,34 +107,14 @@ export default function Workout() {
     return;
   }
 
-  const getWorkoutTitle = async (index: number) => {
-    const workoutData = await getUserWorkouts();
+//Animation---------------------------------------
+  const scale = useSharedValue(1);
 
-    if(workoutData && workoutData.length > 0){
-      return (workoutData[index] as any).title;
-    }
-    return null;
-  }
-
-    const getWorkoutName = async (index: number) => {
-    const workoutData = await getUserWorkouts();
-
-    if(workoutData && workoutData.length > 0){
-      return (workoutData[index] as any).name;
-    }
-    return null;
-  }
-
-  async function getWorkoutLength () : Promise<number> {
-      const workouts = await getUserWorkouts();
-
-      if(workouts != null){
-        return workouts?.length;
-      } else {
-        return -1;
-      }
-      
-    }
+  const animatedStyle = useAnimatedStyle(() => {
+    return{
+      transform: [{ scale: scale.value}],
+    };
+  });
 
   return (
     <SafeAreaView style = {styles.screen}>
@@ -146,19 +127,32 @@ export default function Workout() {
       </View>
       <View style = {styles.content}>
         <Text style = {[styles.title, {marginBottom: 25,}]}>My Workouts</Text>
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
         {workouts && workouts.length > 0 ? (
           workouts.map((workout: any, index : number) => (
-
-              <View key={workout.id} style={index % 2 === 0 ? styles.workoutCardBright : styles.workoutCardDark}>
-                <Text style={index % 2 === 0 ? styles.titleBright : styles.titleDark}>{workout.title}</Text>
-                <View style={{paddingVertical: 10, maxHeight: 100}}>
-                {workout.exercises && workout.exercises.map((ex: any, i : number) => (
-                  <Text key={i} style={index % 2 === 0 ? styles.textBright : styles.textDark}>&gt; {ex.name}</Text>
-                ))}
+            <Animated.View
+              style={animatedStyle}
+            >
+              <Pressable key={workout.id} style={index % 2 === 0 ? styles.workoutCardBright : styles.workoutCardDark} 
+                onPressIn={() => { 
+                  scale.value = withSpring(0.90)
+                }}  
+                onPressOut={() => {
+                  scale.value = withSpring(1.00)
+                }}
+              >
+                
+                <View>
+                  <Text style={index % 2 === 0 ? styles.titleBright : styles.titleDark}>{workout.title}</Text>
+                  <View style={{paddingVertical: 10, maxHeight: 80, overflow:"hidden"}}>
+                  {workout.exercises && workout.exercises.map((ex: any, i : number) => (
+                    <Text key={i} style={index % 2 === 0 ? styles.textBright : styles.textDark}>&gt; {ex.name} ({ex.sets} sets)</Text>
+                  ))}
+                  </View>
                 </View>
-              </View>
-           
+                
+              </Pressable>
+           </Animated.View>
           ))
         ) : (
           <Text>No workouts yet</Text>
@@ -249,7 +243,7 @@ const styles = StyleSheet.create({
 
     paddingVertical: 20,
     paddingHorizontal: 30,
-    
+
     marginBottom: 30,
 
     borderColor: "blue",
@@ -257,6 +251,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
 
     overflow: "hidden",
+
   },
 
   workoutCardDark: {
@@ -268,12 +263,12 @@ const styles = StyleSheet.create({
 
     paddingVertical: 20,
     paddingHorizontal: 30,
-    
+
     marginBottom: 30,
 
     borderRadius: 20,
 
-    
+    overflow: "hidden",
   },
 
   titleDark: {
