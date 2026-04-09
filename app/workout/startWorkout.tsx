@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View, KeyboardAvoidingView, Platform, SectionListComponent, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -29,20 +29,32 @@ export default function StartWorkout() {
 
     const [startTime, setStartTime] = useState<number | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [elapsedMinutes, setElapsedMinutes] = useState(0);
+
+    const [index, setIndex] = useState(0);
 
     useEffect(() => {
         if(!startTime) return;
 
         const interval = setInterval(() => {
-            const secondsPassed = Math.floor((Date.now() - startTime) / 1000);
+            const totalSeconds = Math.floor(( Date.now() - startTime) / 1000);
+
+            const secondsPassed = totalSeconds % 60;
+            const minutesPassed = Math.floor(totalSeconds / 60);
+
+            setElapsedMinutes(minutesPassed);
             setElapsedSeconds(secondsPassed);
+
         }, 1000);
 
         return () => clearInterval(interval);
     }, [startTime]);
 
     const startTimer = () => {
-        setStartTime(Date.now());
+        if(!startTime){
+            setStartTime(Date.now());
+        }
+        
     }
 
     const router = useRouter();
@@ -71,12 +83,9 @@ export default function StartWorkout() {
         getWorkout();
     }, [workoutId]);
 
-    const getExercise = ((index: number) => {
-        workout.exercises.map((ex: any) => {
-            return ex[index];
-        })
-    })
+    const currentExercise = workout?.exercises?.[index];
 
+    const setToInt = parseInt(currentExercise.sets);
 
     //Animation--------------------------------------------
     const scale = useSharedValue(1);
@@ -117,12 +126,26 @@ export default function StartWorkout() {
                                 <Text style={[styles.text, {color: "white"}]}>Start Workout</Text>
                             </Pressable> 
                         </Animated.View>
-                        <Text>{elapsedSeconds}</Text>
+                        <ScrollView style={[styles.scrollContent]}>
+                        
+                            {currentExercise && (
+                                <>
+                                <Text>{currentExercise.name}</Text>
+                                {Array.from({ length: setToInt }).map((_, index) => (
+                                    <TextInput
+                                        
+                                    />
+                                ))}
+                                </>
+                            )}
+                        </ScrollView>
+                        
+                        <View style={[styles.timer, {}]}>
+                            <Text style={[styles.timerText]}>{String(elapsedMinutes).padStart(2, '0')}:{String(elapsedSeconds).padStart(2, '0')}</Text>
+                        </View>
                     </View>
 
-                    <View style={styles.content}>
-                        
-                    </View>
+                    
                 </KeyboardAvoidingView>
             </SafeAreaView>
         </TouchableWithoutFeedback>
@@ -199,12 +222,24 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
 
-    workoutCard: {
-        backgroundColor: "blue",
-        flex: 1,
-        width: "100%",
-        height: 150,
+    timer: {
+        justifyContent: "center",
+        alignItems: "center",
 
+        borderColor: "blue",
+        borderWidth: 3,
+
+        minWidth: 80,
+        minHeight: 80,
+
+        padding: 10,
+
+        borderRadius: 80,
+
+    },
+
+    timerText: {
+        fontFamily: 'AlfaSlabOne_400Regular',
 
     },
 
