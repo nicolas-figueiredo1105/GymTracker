@@ -41,3 +41,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+#databases
+firebase.js
+database/
+
+#
