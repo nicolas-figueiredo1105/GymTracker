@@ -45,6 +45,6 @@ app-example
 
 #databases
 firebase.js
-database/
+/database
 
 #
