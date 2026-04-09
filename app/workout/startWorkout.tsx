@@ -10,6 +10,12 @@ import { doc, getDoc, setDoc, collection, getDocs, addDoc } from "firebase/fires
 import { useState, useEffect } from "react";
 import { db } from "../../firebase";
 
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+
 
 
 export default function StartWorkout() {
@@ -72,6 +78,13 @@ export default function StartWorkout() {
     })
 
 
+    //Animation--------------------------------------------
+    const scale = useSharedValue(1);
+    
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
 
     return (
 
@@ -95,15 +108,21 @@ export default function StartWorkout() {
                         <Text style={[styles.title, {marginRight: 0}]}>
                             {loading ? "Loading..." : workout?.title ?? "Problem Loading Workout"}
                         </Text>
-                        <Pressable onPress={startTimer} style={[styles.createButton, {paddingHorizontal: 10,}]}>
+                        <Animated.View style={animatedStyle}>
+                            <Pressable 
+                                onPress={startTimer} 
+                                onPressIn={() => scale.value = withSpring(0.90)} 
+                                onPressOut={() => scale.value = withSpring(1)}
+                                style={[styles.button, {paddingHorizontal: 10, borderRadius: 60}]}>
                                 <Text style={[styles.text, {color: "white"}]}>Start Workout</Text>
-                            </Pressable>
-                            <Text>{elapsedSeconds}</Text>
+                            </Pressable> 
+                        </Animated.View>
+                        <Text>{elapsedSeconds}</Text>
                     </View>
-                    
 
-
-
+                    <View style={styles.content}>
+                        
+                    </View>
                 </KeyboardAvoidingView>
             </SafeAreaView>
         </TouchableWithoutFeedback>
@@ -189,7 +208,7 @@ const styles = StyleSheet.create({
 
     },
 
-    createButton: {
+    button: {
         backgroundColor: "blue",
         width: 120,
         height: 60,

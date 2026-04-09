@@ -46,7 +46,7 @@ const AnimatedWorkoutButton = ({ title, index, workout}: Props) => {
       <Pressable
         style={styles.pressable}
         onPress={() => router.push({
-          pathname: "/workout/startWorkout",
+          pathname: "../workout/startWorkout",
           params: { workoutId : workout.id}
         })}
         onPressIn={() => {

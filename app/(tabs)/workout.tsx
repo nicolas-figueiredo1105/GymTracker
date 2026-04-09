@@ -10,7 +10,9 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
 
-import AnimatedWorkoutButton from "@/constants/AnimatedButton";
+import AnimatedWorkoutButton from "@/constants/AnimatedWorkoutButton";
+
+
 export default function Workout() {
 
   const auth = getAuth();
