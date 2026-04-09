@@ -1,14 +1,15 @@
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getFirestore } from "firebase/firestore";
 
+import Constants from "expo-constants";
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCmKAZ1k95ysyVjjE9XXo0VYC29CSH3y_0",
-  authDomain: "gymtracker-94bf7.firebaseapp.com",
+  apiKey: Constants.expoConfig.extra.FIREBASE_API_KEY,
+  authDomain: Constants.expoConfig.extra.FIREBASE_AUTH_DOMAIN,
   projectId: "gymtracker-94bf7",
   storageBucket: "gymtracker-94bf7.firebasestorage.app",
   messagingSenderId: "1037263671983",

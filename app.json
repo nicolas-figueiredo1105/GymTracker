@@ -8,6 +8,10 @@
     "scheme": "gymtracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra" : {
+      "FIREBASE_API_KEY": "AIzaSyCmKAZ1k95ysyVjjE9XXo0VYC29CSH3y_0",
+      "FIREBASE_AUTH_DOMAIN": "gymtracker-94bf7.firebaseapp.com"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.GymTracker"
