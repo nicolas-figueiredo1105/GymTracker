@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-import { getAuth } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
   
@@ -21,21 +21,24 @@ export default function Home() {
   const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
 
+  const [streakUpdated, setStreakUpdated] = useState(false);
+
+  const loadUser = async () => {
+    const userData = await getUserData();
+
+    if (!userData) return;
+
+    setFirstName(userData.first_name);
+    setStreak(userData.streak || 0);
+  };
+
   useEffect(() => {
-    const loadUser = async () => {
-      const firstName = await getFirstName();
-      const streak = await getStreak();
-
-      if(firstName) {
-        setFirstName(firstName);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if(user){
+        updateStreak();
       }
-
-      if(streak) {
-        setStreak(streak);
-      }
-
-    };
-    loadUser();
+    });
+    return unsubscribe;
   }, []);
 
   const getUserData = async () => {
@@ -66,14 +69,44 @@ export default function Home() {
     return;
   }
 
-  const getStreak = async () => {
-    const userData = await getUserData();
-    if(userData != null){
-      return userData?.streak;
-    }
-    return;
-  }
 
+  const updateStreak = async () => {
+    const user = auth.currentUser;
+
+    if(!user) return;
+
+    const ref = collection(db, "users", user.uid, "workoutHistory");
+    const q = query(ref, orderBy("date", "desc"), limit(1));
+    const snap = await getDocs(q);
+
+    if(snap.empty) return;
+
+    const lastWorkout = snap.docs[0].data().date.toDate().toLocaleDateString("en-CA");
+    const today = new Date().toLocaleDateString("en-CA");
+
+
+    const yesterday = () => { 
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toLocaleDateString("en-CA");
+    }
+      
+    
+    
+    if((lastWorkout === yesterday() && streakUpdated === false)){
+      setStreak((prev) => prev + 1);
+      setStreakUpdated(true);
+    } else if (lastWorkout == today){
+      return;
+    } else {
+      setStreak(0);
+      setStreakUpdated(false);
+    }
+
+    await updateDoc(doc(db, "users", user.uid), {
+      streak: streak,
+    });
+  }
 
   return (
     <SafeAreaView style = {styles.screen}>
@@ -88,6 +121,10 @@ export default function Home() {
         <View style={styles.dashBoard}>
           <Text style = {styles.title}>Hello {firstName},</Text>
         </View>
+
+        <ScrollView>
+
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

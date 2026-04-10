@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import { Button } from 'react-native'
-import React, {useState} from 'react'
-import { Link } from 'expo-router';
+import React, { useState } from 'react'
+import { Link, Stack } from 'expo-router';
 import { useRouter } from "expo-router";
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -12,98 +11,108 @@ import { auth } from '../firebase';
 
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
 
-    const login = async () => {
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log("Logged in!");
-        router.push('/(tabs)/home');
-        return userCredential.user;
-      }catch (error) {
-        console.log(error);
-        alert("Invalid Credentials, Try Again.")
-      }
-    };
+  const login = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Logged in!");
+      router.push('/(tabs)/home');
+      return userCredential.user;
+    } catch (error) {
+      console.log(error);
+      alert("Invalid Credentials, Try Again.")
+    }
+  };
 
-  return ( 
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style = {styles.screen}>
-        <View style={styles.header}>
-          <Text style = {styles.title}>Gym Tracker</Text>
-        </View>
-        <View style = {styles.content}>
-          <Text style = {styles.formTitle}>Log In</Text>
-          <TextInput
-              style = {styles.input}
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+        }}
+      />
+
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.screen}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Gym Tracker</Text>
+          </View>
+          <View style={styles.content}>
+            <Text style={styles.formTitle}>Log In</Text>
+            <TextInput
+              style={styles.input}
               value={email}
               onChangeText={setEmail}
               placeholder="Email"
               placeholderTextColor={"#000000a9"}
               keyboardType='email-address'
-          />
-          <TextInput
-              value = {password}
+            />
+            <TextInput
+              value={password}
               onChangeText={setPassword}
-              style = {styles.input}
+              style={styles.input}
               placeholder="Password"
               placeholderTextColor={"#000000a9"}
               secureTextEntry
               textContentType='password'
-          />
+            />
 
-          <Pressable
-              style = {({pressed}) => [
-                  styles.loginButton,
-                  { backgroundColor: pressed ? "white" : "blue",
-                    color: pressed ? "blue" : "white"
-                  }
+            <Pressable
+              style={({ pressed }) => [
+                styles.loginButton,
+                {
+                  backgroundColor: pressed ? "white" : "blue",
+                  color: pressed ? "blue" : "white"
+                }
               ]}
-              onPress={() =>{
-                  login();
+              onPress={() => {
+                login();
 
-                  setEmail('');
-                  setPassword('');
+                setEmail('');
+                setPassword('');
               }}
-          >
-              {({pressed}) => (
-                  <Text style = {[styles.buttonText,
-                      {color: pressed ? "blue" : "white"}
-                  ]}>Log In</Text>
+            >
+              {({ pressed }) => (
+                <Text style={[styles.buttonText,
+                { color: pressed ? "blue" : "white" }
+                ]}>Log In</Text>
               )}
-                  
-              
-              
-          </Pressable>
-        </View>
 
-        <View style = {styles.content}>
-          <Text style = {styles.text}>Don't have an account?{"\n"}Sign up right now!</Text>
-          <Pressable
-          style = {({pressed}) => [
-                  styles.loginButton,
-                  { backgroundColor: pressed ? "white" : "blue",
-                    color: pressed ? "blue" : "white"
-                  }
+
+
+            </Pressable>
+          </View>
+
+          <View style={styles.content}>
+            <Text style={styles.text}>Don't have an account?{"\n"}Sign up right now!</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.loginButton,
+                {
+                  backgroundColor: pressed ? "white" : "blue",
+                  color: pressed ? "blue" : "white"
+                }
               ]}
-          onPress = {() => router.push("/signup")} 
-          >
-              {({pressed}) => (
-                  <Text style = {[styles.buttonText,
-                      {color: pressed ? "blue" : "white"}
-                  ]}>Sign Up</Text>
+              onPress={() => router.push("/signup")}
+            >
+              {({ pressed }) => (
+                <Text style={[styles.buttonText,
+                { color: pressed ? "blue" : "white" }
+                ]}>Sign Up</Text>
               )}
-          </Pressable>
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </>
   )
 }
 const styles = StyleSheet.create({
   profileIcon: {
-    position:'absolute',
+    position: 'absolute',
     right: 20,
     top: 100,
   },
@@ -115,7 +124,7 @@ const styles = StyleSheet.create({
 
   header: {
     height: 200,
-    justifyContent:'center',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'blue',
 
@@ -126,7 +135,7 @@ const styles = StyleSheet.create({
 
     //iOS
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.8,
     shadowRadius: 6,
 
@@ -176,7 +185,7 @@ const styles = StyleSheet.create({
 
     borderColor: "blue",
     borderWidth: 4,
-    
+
     justifyContent: 'center',
     alignItems: 'center',
 
@@ -199,7 +208,7 @@ const styles = StyleSheet.create({
 
     borderColor: "blue",
     borderWidth: 2,
-    
+
     justifyContent: 'center',
     alignItems: 'center',
 
@@ -215,7 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
 
     alignSelf: 'center',
-    
+
     textAlign: 'center',
 
     marginBottom: 20,

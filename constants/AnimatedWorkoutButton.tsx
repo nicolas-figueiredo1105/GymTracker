@@ -1,14 +1,8 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useRouter } from "expo-router";
-
-const router = useRouter();
+import AnimatedPressable from "./AnimatedPressable";
 
 type Exercise = {
   name?: string;
@@ -28,34 +22,22 @@ type Props = {
 };
 
 const AnimatedWorkoutButton = ({ title, index, workout}: Props) => {
-  const scale = useSharedValue(1);
+  const router = useRouter();
   const isBright = index % 2 === 0;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
   return (
-    <Animated.View
-      style={[
+    <AnimatedPressable
+      containerStyle={[
         styles.cardBase,
         isBright ? styles.workoutCardBright : styles.workoutCardDark,
-        animatedStyle,
       ]}
-    >
-      <Pressable
-        style={styles.pressable}
-        onPress={() => router.push({
+      style={styles.pressable}
+      onPress={() => router.push({
           pathname: "../workout/startWorkout",
           params: { workoutId : workout.id}
         })}
-        onPressIn={() => {
-          scale.value = withSpring(0.92);
-        }}
-        onPressOut={() => {
-          scale.value = withSpring(1);
-        }}
-      >
+      pressedScale={0.92}
+    >
         <View>
           <Text style={isBright ? styles.titleBright : styles.titleDark}>
             {title}
@@ -71,8 +53,7 @@ const AnimatedWorkoutButton = ({ title, index, workout}: Props) => {
             ))}
           </View>
         </View>
-      </Pressable>
-    </Animated.View>
+    </AnimatedPressable>
   );
 };
 
@@ -84,7 +65,6 @@ const styles = StyleSheet.create({
     height: 150,
     marginBottom: 30,
     borderRadius: 20,
-    overflow: "hidden",
   },
 
   pressable: {
@@ -104,6 +84,15 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderColor: "blue",
     borderWidth: 5,
+
+    //iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 7 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+
+    //Android
+    elevation: 5,
   },
 
   workoutCardDark: {
