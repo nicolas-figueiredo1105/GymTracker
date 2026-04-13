@@ -23,23 +23,22 @@ export default function Home() {
 
   const [streakUpdated, setStreakUpdated] = useState(false);
 
-  const loadUser = async () => {
-    const userData = await getUserData();
-
-    if (!userData) return;
-
-    setFirstName(userData.first_name);
-    setStreak(userData.streak || 0);
-  };
+  useEffect(() => {
+    if(auth.currentUser){
+      updateStreak();
+    }
+  }, [auth.currentUser]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if(user){
-        updateStreak();
-      }
-    });
-    return unsubscribe;
-  }, []);
+    const loadName = async () => {
+      const getFName = await getFirstName();
+      setFirstName(getFName);
+    };
+
+    loadName();
+
+
+  }, [])
 
   const getUserData = async () => {
     const user = auth.currentUser;
@@ -91,21 +90,28 @@ export default function Home() {
       return d.toLocaleDateString("en-CA");
     }
       
+    const userData = await getDoc(doc(db, "users", user.uid));
+    const currentStreak = userData.data()?.streak || 0;
     
-    
-    if((lastWorkout === yesterday() && streakUpdated === false)){
-      setStreak((prev) => prev + 1);
-      setStreakUpdated(true);
-    } else if (lastWorkout == today){
+    if (lastWorkout == today){
       return;
+    } else if((lastWorkout === yesterday() && streakUpdated === false)){
+      const newStreak = currentStreak + 1;
+      setStreak(newStreak);
+      setStreakUpdated(true);
+
+      await updateDoc(doc(db, "users", user.uid), {
+        streak: newStreak,
+      });
+
     } else {
       setStreak(0);
       setStreakUpdated(false);
-    }
 
-    await updateDoc(doc(db, "users", user.uid), {
-      streak: streak,
-    });
+      await updateDoc(doc(db, "users", user.uid), {
+        streak: 0,
+      });
+    }
   }
 
   return (
