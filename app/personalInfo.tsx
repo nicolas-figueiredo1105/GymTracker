@@ -41,8 +41,15 @@ const personalInfo = () => {
   };
 
   const checkSubmit = () => {
+    const heightInInt = parseInt(heightIn);
+    const heightFtInt = parseInt(heightFt);
+
     if (heightFt == '' || heightIn == '' || bodyWeight == '' || dateOfBirth == null) {
       alert("Empty Fields! Fill up all the required information");
+      return false;
+    
+    } else if ((heightInInt > 11 || heightInInt < 0) || (heightFtInt < 0)) {
+      alert("Invalid height input. Feet must be greater than 0 and Inches must be positive and less than 12");
       return false;
     } else {
       return true;
@@ -102,11 +109,11 @@ const personalInfo = () => {
     let month = date.getMonth() + 1;
     let day = date.getDate();
 
-    return `${month}/${day}/${year}`
+    return `${String(month).padStart(2, "0")}/${String(day).padStart(2, '0')}/${year}`
   }
 
   const formatHeight = (heightF: string, heightI: string) => {
-    return `${heightF}'${heightI}"`;
+    return `${heightF}'${String(heightI).padStart(2, '0')}"`;
   }
 
   return (
@@ -114,7 +121,7 @@ const personalInfo = () => {
       Keyboard.dismiss();
       setShowPicker(false);
     }}>
-      <View style={{flex: 1, backgroundColor: "white"}}>
+        <View style={[styles.screen, {}]}>
           <View style={styles.header}>
             <Text style={styles.title}>Gym Tracker</Text>
           </View>
@@ -131,6 +138,7 @@ const personalInfo = () => {
                   onChangeText={setHeightFt}
                   placeholderTextColor={"#000000a9"}
                   keyboardType='number-pad'
+                  maxLength={1}
                 />
 
                 <Text>In:</Text>
@@ -140,6 +148,7 @@ const personalInfo = () => {
                   onChangeText={setHeightIn}
                   placeholderTextColor={"#000000a9"}
                   keyboardType='number-pad'
+                  maxLength={2}
                 />
 
                 <TextInput
@@ -159,12 +168,13 @@ const personalInfo = () => {
                   
                   <View style= {styles.dateTimeContainer}>
                     <DateTimePicker
-                      mode='date'
+                      
                       display='spinner'
                       value={date}
                       onChange={onChange}
-                      style={[styles.datePicker, { position: 'relative' }]}
+                      style={[styles.datePicker, { position: 'relative', }]}
                       maximumDate={new Date()}
+                      textColor='black'
                     />
                     {Platform.OS === "ios" && (
                       <View
@@ -240,6 +250,12 @@ const personalInfo = () => {
 }
 
 const styles = StyleSheet.create({
+
+  screen: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+
   profileIcon: {
     position: 'absolute',
     right: 20,
@@ -255,7 +271,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
 
-    paddingTop:60,
+
 
     marginBottom: 50,
 
@@ -277,6 +293,7 @@ const styles = StyleSheet.create({
     fontFamily: 'AlfaSlabOne_400Regular',
 
     position: 'absolute',
+    top: 100,
   },
 
   content: {
@@ -413,6 +430,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: 20,
     width: "100%",
+    
   },
 
   cancelButton: {

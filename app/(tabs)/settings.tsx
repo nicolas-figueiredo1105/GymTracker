@@ -104,12 +104,15 @@ export default function Settings() {
         <View style={styles.settingsContent}>
 
 
-          <Pressable style={[styles.settingsWrap, {}]}>
+          <Pressable 
+            style={[styles.settingsWrap, {}]}
+            onPress={() => router.push("/settingsScreens/viewProfile")}
+          >
             <View style={[styles.settingsIconWrap]}>
               <MaterialIcons name="account-circle" size={30} color={"blue"} />
               <Text style={[styles.text, {}]}>
 
-                View Account
+                View Profile
               </Text>
             </View>
 
@@ -118,7 +121,7 @@ export default function Settings() {
 
           <Pressable
             style={[styles.settingsWrap, {}]}
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/settingsScreens/aboutUs")}
           >
             <View style={[styles.settingsIconWrap]}>
               <FontAwesome5 name="question" size={30} color={"blue"} />

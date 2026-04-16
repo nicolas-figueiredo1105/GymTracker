@@ -43,13 +43,13 @@ export default function StartWorkout() {
     }, [startTime, isRunning, totalSavedMs]);
 
     const startTimer = () => {
-        if(isRunning) return;
+        if (isRunning) return;
         setStartTime(Date.now());
         setIsRunning(true);
     }
 
     const stopTimer = () => {
-        if(!isRunning || startTime === null) return;
+        if (!isRunning || startTime === null) return;
         const total = totalSavedMs + (Date.now() - startTime);
         setTotalSavedMs(total);
         setTotalMs(total);
@@ -91,16 +91,16 @@ export default function StartWorkout() {
         Alert.alert(
             "Confirm Action",
             "Are you sure you want to go back? Your workout won't be saved.", [
-                {
-                    text: "Yes",
-                    onPress: () => router.back(),
-                    style: "destructive",
-                },
-                {
-                    text: 'Cancel',
-                    style: "cancel",
-                }
-            ]
+            {
+                text: "Yes",
+                onPress: () => router.back(),
+                style: "destructive",
+            },
+            {
+                text: 'Cancel',
+                style: "cancel",
+            }
+        ]
         )
     }
 
@@ -120,18 +120,18 @@ export default function StartWorkout() {
 
     const updateSetValue = (
         exerciseIndex: number,
-        setIndex : number,
+        setIndex: number,
         field: "weight" | "reps",
         value: string
     ) => {
-        setSessionData((prev : any) => {
-            return prev.map((exercise : any, exIdx : number) => {
-                if(exIdx !== exerciseIndex) return exercise;
+        setSessionData((prev: any) => {
+            return prev.map((exercise: any, exIdx: number) => {
+                if (exIdx !== exerciseIndex) return exercise;
 
                 return {
                     ...exercise,
-                    sets: exercise.sets.map((set : any, sIdx : number) => {
-                        if(sIdx !== setIndex) return set;
+                    sets: exercise.sets.map((set: any, sIdx: number) => {
+                        if (sIdx !== setIndex) return set;
 
                         return {
                             ...set,
@@ -146,7 +146,7 @@ export default function StartWorkout() {
     const saveWorkout = async () => {
         const user = auth.currentUser;
         try {
-            if(!user) return;
+            if (!user) return;
 
             const ref = collection(db, "users", user.uid, "workoutHistory");
 
@@ -158,30 +158,30 @@ export default function StartWorkout() {
             }
 
             await addDoc(collection(db, "users", user.uid, "workoutHistory"), workoutHistory);
-            
+
             router.back();
-        } catch (error){
+        } catch (error) {
             console.log(error);
         }
     }
 
     return (
         <>
-        <Stack.Screen
-            options={{
-            gestureEnabled: false,
-            }}
-        />
-        
-        
-        
+            <Stack.Screen
+                options={{
+                    gestureEnabled: false,
+                }}
+            />
+
+
+
             <SafeAreaView style={styles.screen}>
                 <KeyboardAvoidingView
                     style={styles.content}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
 
                 >
-                    <View style={{ width: 100, height: 50, marginBottom: 30, }}>
+                    <View style={{ width: 100, height: 50, }}>
                         <Pressable style={{ flex: 1, flexDirection: 'row', alignItems: 'center', }}
                             onPress={() => choiceAlert()}
                         >
@@ -189,36 +189,36 @@ export default function StartWorkout() {
                             <Text style={{ color: "blue", fontFamily: "Poppins_700Bold" }}>Back</Text>
                         </Pressable>
                     </View>
+                    <ScrollView
+                        style={[styles.scrollContent, { flex: 1, }]}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="on-drag"
+                    >
+                        <View style={[styles.header, { justifyContent: "center", marginRight: 0, marginTop: 35, }]}>
+                            <Text style={[styles.title, { marginRight: 0, fontSize: 36 }]}>
+                                {loading ? "Loading..." : workout?.title ?? "Problem Loading Workout"}
+                            </Text>
+                            <AnimatedPressable
+                                onPress={startTimer}
+                                style={[styles.button, { paddingHorizontal: 10, borderRadius: 60, backgroundColor: "#05bd0e" }]}>
+                                <Text style={[styles.text, { color: "white" }]}>Start Timer</Text>
+                            </AnimatedPressable>
 
-                    <View style={[styles.header, { justifyContent: "center", marginRight: 0 }]}>
-                        <Text style={[styles.title, { marginRight: 0, fontSize: 36 }]}>
-                            {loading ? "Loading..." : workout?.title ?? "Problem Loading Workout"}
-                        </Text>
-                        <AnimatedPressable
-                            onPress={startTimer}
-                            style={[styles.button, { paddingHorizontal: 10, borderRadius: 60 }]}>
-                            <Text style={[styles.text, { color: "white" }]}>Start Timer</Text>
-                        </AnimatedPressable>
 
+                        </View>
+                        <View style={{ flex: 1, width: "100%", }}>
 
-                    </View>
-                    <View style={{ flex: 1, width: "100%",}}>
-                        <ScrollView 
-                            style={[styles.scrollContent, { flex: 1, }]}
-                            keyboardShouldPersistTaps="handled"
-                            keyboardDismissMode="on-drag"
-                        >
                             {workout?.exercises?.map((ex: any, exerciseIndex: number) => (
-                                <View key={ex.id ?? `exercise-${exerciseIndex}`} style={{marginBottom: 30,}}>
+                                <View key={ex.id ?? `exercise-${exerciseIndex}`} style={{ marginBottom: 30, }}>
                                     <Text style={[styles.text, { textAlign: "left", color: "blue", fontSize: 25, marginBottom: 15 }]}>
                                         {ex?.name}
                                     </Text>
                                     <View style={[{ gap: 20 }]}>
                                         {Array.from({ length: parseInt(ex?.sets) || 0 }).map((_, setIndex) => (
                                             <View key={`exercise-${exerciseIndex}-set-${setIndex}`} style={[{ flex: 1, gap: 10 }]}>
-                                                <Text style={[styles.text, {color: "blue", textAlign: "left", borderColor: "blue", borderBottomWidth: 3,}]}>Set {setIndex + 1}</Text>
+                                                <Text style={[styles.text, { color: "blue", textAlign: "left", borderColor: "blue", borderBottomWidth: 3, }]}>Set {setIndex + 1}</Text>
 
-                                                <View style={{ flexDirection: "row", alignItems: "center"}}>
+                                                <View style={{ flexDirection: "row", alignItems: "center" }}>
                                                     <FocusHideInput
                                                         defaultPlaceholder="Weight"
                                                         placeholderTextColor={"#2600ff93"}
@@ -240,14 +240,15 @@ export default function StartWorkout() {
                                                         keyboardType="decimal-pad"
                                                     />
                                                 </View>
-                                                
+
                                             </View>
                                         ))}
                                     </View>
                                 </View>
                             ))}
-                        </ScrollView>
-                    </View>
+
+                        </View>
+                    </ScrollView>
                 </KeyboardAvoidingView>
                 <Timer
                     minutes={elapsedMinutes}
@@ -255,13 +256,13 @@ export default function StartWorkout() {
                 />
 
                 <View style={styles.footer}>
-                    <AnimatedPressable 
-                    onPress={saveWorkout}
-                    style={[styles.button, { paddingHorizontal: 10, borderRadius: 60 }]}>
+                    <AnimatedPressable
+                        onPress={saveWorkout}
+                        style={[styles.button, { paddingHorizontal: 10, borderRadius: 60 }]}>
                         <Text style={[styles.text, { color: "white" }]}>Finish Workout</Text>
                     </AnimatedPressable>
 
-                    <AnimatedPressable 
+                    <AnimatedPressable
                         onPress={() => {
                             stopTimer();
                         }}
@@ -272,7 +273,7 @@ export default function StartWorkout() {
 
 
             </SafeAreaView>
-        
+
         </>
     );
 }
@@ -427,8 +428,8 @@ const styles = StyleSheet.create({
 
         fontFamily: "Poppins_700Bold",
 
-        width: 100, 
-        marginBottom: 0, 
+        width: 100,
+        marginBottom: 0,
         fontSize: 16,
 
         textAlign: "center",

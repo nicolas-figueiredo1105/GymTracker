@@ -68,14 +68,14 @@ export default function CreateWorkout() {
 
   return (
 
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    
       <SafeAreaView style={styles.screen}>
         <KeyboardAvoidingView
           style={styles.content}
           behavior={Platform.OS == "ios" ? "padding" : "height"}
 
         >
-          <View style={{ width: 100, height: 50, marginBottom: 30, }}>
+          <View style={{ width: 100, height: 50, marginBottom: 15, }}>
             <Pressable style={{ flex: 1, flexDirection: 'row', alignItems: 'center', }}
               onPress={() => router.back()}
             >
@@ -85,7 +85,11 @@ export default function CreateWorkout() {
           </View>
 
           <View style={styles.form}>
-            
+            <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
               <TextInput
                 placeholder="Workout Title"
                 placeholderTextColor="#0004ff7a"
@@ -93,11 +97,7 @@ export default function CreateWorkout() {
                 onChangeText={setWorkoutTitle}
               />
 
-              <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
+          
 
               <View>
                 <View>
@@ -207,7 +207,6 @@ export default function CreateWorkout() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </TouchableWithoutFeedback>
   );
 }
 
