@@ -174,7 +174,7 @@ export default function Workout() {
               ))}
             </ScrollView>
           ) : (
-            <View style={[{ flex: 1, alignItems: "center", justifyContent: "center", opacity: 0.3, paddingBottom: 60 }]}>
+            <View style={[{ flex: 1, alignItems: "center", justifyContent: "center", opacity: 0.3, paddingBottom: 60, minHeight: "100%" }]}>
               <FontAwesome5 name="dumbbell" size={60} style={[styles.iconLogo, { marginRight: 0 }]} />
               <Text style={[styles.title, { marginRight: 0 }]}>GymTracker</Text>
               <Text>No workouts yet</Text>
@@ -251,9 +251,6 @@ const styles = StyleSheet.create({
     paddingRight: 30,
   },
 
-  dashBoard: {
-
-  },
 
   dashBoardText: {
     fontFamily: "Poppins_700Bold",

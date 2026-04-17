@@ -1,5 +1,5 @@
-import { Stack, Link, useRouter } from "expo-router";
-import React from "react";
+import { Stack, Link, useRouter, useFocusEffect } from "expo-router";
+import React, { useCallback } from "react";
 import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -26,22 +26,24 @@ export default function Settings() {
   const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const firstName = await getFirstName();
-      const streak = await getStreak();
+  useFocusEffect(
+    useCallback(() => {
+      const loadUser = async () => {
+        const firstName = await getFirstName();
+        const streak = await getStreak();
 
-      if (firstName) {
-        setFirstName(firstName);
-      }
+        if (firstName) {
+          setFirstName(firstName);
+        }
 
-      if (streak) {
-        setStreak(streak);
-      }
+        if (streak) {
+          setStreak(streak);
+        }
 
-    };
-    loadUser();
-  }, []);
+      };
+      loadUser();
+    }, [])
+  )
 
   const getUserData = async () => {
     const user = auth.currentUser;
@@ -79,13 +81,13 @@ export default function Settings() {
     return;
   }
 
-  const signout = () =>{
+  const signout = () => {
     signOut(auth).then(() => {
-        console.log("User signed out successfully.");
-        router.push("/login");
-      }).catch((error) => {
-        console.log(error);
-      });
+      console.log("User signed out successfully.");
+      router.push("/login");
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 
 
@@ -100,11 +102,11 @@ export default function Settings() {
       </View>
       <View style={styles.content}>
 
-        <Text style={[styles.title, {marginBottom: 20, fontSize: 28}]}>Settings</Text>
+        <Text style={[styles.title, { marginBottom: 20, fontSize: 28 }]}>Settings</Text>
         <View style={styles.settingsContent}>
 
 
-          <Pressable 
+          <Pressable
             style={[styles.settingsWrap, {}]}
             onPress={() => router.push("/settingsScreens/viewProfile")}
           >
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
 
     textAlign: 'center',
-    
+
     color: "black",
   },
 
@@ -236,8 +238,8 @@ const styles = StyleSheet.create({
   },
 
   settingsIconWrap: {
-    flexDirection: "row", 
-    alignItems: "center", 
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
 

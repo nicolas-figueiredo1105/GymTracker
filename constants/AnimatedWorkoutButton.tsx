@@ -61,7 +61,6 @@ export default AnimatedWorkoutButton;
 
 const styles = StyleSheet.create({
   cardBase: {
-    width: "100%",
     height: 150,
     marginBottom: 30,
     borderRadius: 20,

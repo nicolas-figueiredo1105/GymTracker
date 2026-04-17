@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import React from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -7,14 +7,15 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 import { getAuth } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 
 import { Dropdown } from 'react-native-element-dropdown';
-import { BarChart, LineChart, PieChart, PopulationPyramid, RadarChart, BubbleChart } from "react-native-gifted-charts";
+import { LineChart, Pointer } from "react-native-gifted-charts";
 
 import { StatusBar } from "expo-status-bar";
+import AnimatedWorkoutButton from "@/constants/AnimatedWorkoutButton";
 
 
 
@@ -27,7 +28,7 @@ export default function Home() {
   const [streak, setStreak] = useState(0);
 
   const [workouts, setWorkouts] = useState<any>(null);
-  
+
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
   const [selectedExercise, setSelectExercise] = useState<any>(null);
@@ -40,39 +41,43 @@ export default function Home() {
   const [bmi, setBmi] = useState(0);
 
   //Load name, streak and BMI
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      const loadName = async () => {
+        const getFName = await getFirstName();
+        setFirstName(getFName);
+      };
 
-    const loadName = async () => {
-      const getFName = await getFirstName();
-      setFirstName(getFName);
-    };
+      const heightToInt = async () => {
+        const userData = await getUserData();
+        const height = userData?.height;
 
-    const heightToInt = async () => {
-      const userData = await getUserData();
-      const height = userData?.height;
+        return (parseInt(height.substring(2, 4))) + (parseInt(height.substring(0, 1)) * 12);
+      };
 
-      return (parseInt(height.substring(2, 4))) + (parseInt(height.substring(0, 1)) * 12);
-    }
+      const calculateBmi = async () => {
+        const userData = await getUserData();
 
-    const calculateBmi = async () => {
-      const userData = await getUserData();
+        const bodyWeight = parseInt(userData?.body_weight);
+        console.log("Body weight: " + bodyWeight);
+        const height = await heightToInt();
+        console.log("Height(In): " + height);
 
-      const bodyWeight = parseInt(userData?.body_weight);
-      console.log("Body weight: " + bodyWeight);
-      const height = await heightToInt();
-      console.log("Height(In): " + height);
+        const bmiFormula = (bodyWeight * 703) / Math.pow(height, 2);
 
-      const bmiFormula = (bodyWeight * 703) / Math.pow(height, 2);
+        setBmi(Number(bmiFormula.toFixed(1)));
+        console.log(bmi);
+      };
 
-      setBmi(Number(bmiFormula.toFixed(1)));
-      console.log(bmi);
-    }
+      loadName();
+      loadStreak();
+      calculateBmi();
 
-    loadName();
-    loadStreak();
-    calculateBmi();
-
-  }, [])
+      setSelectedWorkout(null);
+      setSelectExercise(null);
+      setWorkoutTitles([]);
+    }, [])
+  );
 
   //Load workouts
   useEffect(() => {
@@ -103,16 +108,18 @@ export default function Home() {
   }, []);
 
   //Load workout titles
-  useEffect(() => {
-    if (!workouts) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!workouts) return;
 
-    const titles = workouts.map((workout: any,) => ({
-      label: workout.title,
-      value: workout.id,
-    }));
+      const titles = workouts.map((workout: any,) => ({
+        label: workout.title,
+        value: workout.id,
+      }));
 
-    setWorkoutTitles(titles);
-  }, [workouts]);
+      setWorkoutTitles(titles);
+    }, [workouts])
+  )
 
   //Load selected workout exercises titles
   useEffect(() => {
@@ -122,6 +129,7 @@ export default function Home() {
       label: ex.name,
       value: ex.name,
     }));
+
 
     setExercises(exTitles);
   }, [selectedWorkout]);
@@ -137,23 +145,42 @@ export default function Home() {
 
       const snap = await getDocs(collection(db, "users", user.uid, "workoutHistory"));
 
-      const allSessions = snap.docs.map((doc: any) => ({
+      const allHistory = snap.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }));
 
-      const getExerciseHistory = allSessions.flatMap(session => {
-        return session.exercise_info.filter((ex: any) => ex.name === selectedExercise).flatMap((ex: any) => ex.sets.map((set: any) => ({
-          value: Number(set.weight),
+      if (!selectedExercise) {
+        setExerciseWeightHistory([]);
+        return;
+      }
+
+      const getExerciseHistory = allHistory.map(session => {
+        return session.exercise_info.filter((ex: any) => ex.name === selectedExercise).flatMap((ex: any) => ex.sets.map((set: any) =>
+        ({
+          value: parseInt(set.weight),
           label: session.date.toDate().toLocaleString(),
           date: session.date.toMillis(),
-          
         }))
         );
       });
-      const sorted = getExerciseHistory.sort((a, b) => a.date - b.date);
 
-      setExerciseWeightHistory(sorted);
+
+
+      const average = getExerciseHistory.filter(group => group.length > 0).map(group => {
+        const avg = group.reduce((sum: number, item: any) => sum + item.value, 0) / group.length;
+
+        return {
+          value: Math.round(avg * 10) / 10,
+          label: new Date(group[0]?.date).toLocaleDateString("en-DT", { month: "2-digit", day: "numeric", year: "2-digit" }),
+          date: group[0]?.date,
+        }
+      })
+
+
+      average.sort((a: any, b: any) => a.date - b.date);
+
+      setExerciseWeightHistory(average);
     }
 
     getExerciseData();
@@ -230,7 +257,7 @@ export default function Home() {
 
 
 
-    <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
       <StatusBar style="dark" />
       <ScrollView
         style={{ flex: 1, padding: 0 }}
@@ -251,7 +278,8 @@ export default function Home() {
           <View style={{ flex: 1, }}>
 
             <View>
-              <Text style={styles.title2}>View Weight Progress</Text>
+              <Text style={[styles.title2, { marginBottom: 10 }]}>View Weight Progress</Text>
+              <Text style={[styles.text, { marginBottom: 30, }]}>Check how much you progressed based on the average weight lifted in each of your workouts.</Text>
               <View style={[{ flexDirection: "row", flex: 1, marginBottom: 40, justifyContent: "space-around" }]}>
                 <Dropdown
                   style={styles.dropdown}
@@ -268,7 +296,6 @@ export default function Home() {
                   data={workoutTitles}
                   labelField={"label"}
                   valueField={"value"}
-                  value={selectedWorkout}
                 />
 
                 {selectedWorkout && (
@@ -290,55 +317,90 @@ export default function Home() {
 
               {selectedExercise && (
                 <View style={{ marginBottom: 40 }}>
-                  <LineChart
-                    data={exerciseWeightHistory}
-                    focusEnabled
-                    focusedDataPointColor={"blue"}
-                    curved
-                    showDataPointOnFocus
-                    focusedDataPointLabelComponent={(info: any) => {
-                      return (
-                        <View style={{
-                          backgroundColor: "blue",
-                          padding: 8,
-                          borderRadius: 4,
-                          zIndex: 100,
-                        }}>
-                          <Text style={{color: "white", fontFamily: "Poppins_700Bold"}}>Weight: {info.value}</Text>
-                          <Text style={{color: "white", fontFamily: "Poppins_700Bold"}}>Date: {new Date(info.date).toLocaleDateString()}</Text>
-                        </View>
-                      )
-                    }}
-                  dataPointLabelWidth={150}
-                  dataPointLabelShiftY={40}
-                  dataPointLabelShiftX={20}
+                  {exerciseWeightHistory.length > 0 ? (
+                    <LineChart
+                      data={exerciseWeightHistory}
+                      focusEnabled
+                      focusedDataPointColor={"blue"}
+                      showDataPointOnFocus
+                      focusedDataPointLabelComponent={(info: any) => {
+                        return (
+                          <View style={{
+                            backgroundColor: "blue",
+                            padding: 8,
+                            borderRadius: 4,
+                            zIndex: 100,
+                          }}>
+                            <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Weight: {info.value}lbs</Text>
+                            <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Date: {info.label}</Text>
+                          </View>
+                        )
+                      }}
+                      dataPointLabelWidth={150}
+                      dataPointLabelShiftY={40}
+                      dataPointLabelShiftX={20}
 
-                  initialSpacing={60}
-                  endSpacing={60}
-                  />
+                      spacing={100}
+                      xAxisLabelTextStyle={[styles.textGraph, { width: 100, }]}
+                      yAxisTextStyle={styles.textGraph}
+
+
+                      initialSpacing={60}
+                      endSpacing={60}
+
+                      delayBeforeUnFocus={1000}
+
+                    />
+                  ) : (
+                    <Text style={[styles.text, { textAlign: "center" }]}>
+                      No workout history for this exercise.
+                    </Text>
+                  )}
                 </View>
-
               )}
-            </View>
 
-            <View style={[styles.quickStartWrap, { marginBottom: 40 }]}>
-              <Text style={styles.title2}>Quick Start</Text>
-              <Pressable>
 
-              </Pressable>
-            </View>
+              <View style={[styles.quickStartWrap, { marginBottom: 40 }]}>
+                <Text style={styles.title2}>Quick Start</Text>
 
-            <Text style={[styles.title2, { marginBottom: 10, }]}>My BMI</Text>
-            <View style={[styles.bmiCard, getBmiStyle(), { marginBottom: 30, }]}>
-              <Text style={[styles.bmiTitle, { textAlign: "center" }]}>BMI Value: {bmi}</Text>
-              <Text style={[styles.text, { marginBottom: 20, }]}>{getMessage()}</Text>
+                {workouts && workouts.length > 0 ? (
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <View style={{ flexDirection: "row", gap: 40 }}>
+                      {workouts.map((workout: any, index: number) => (
+                        <AnimatedWorkoutButton
+                          key={workout.id ?? index}
+                          title={workout.title}
+                          index={index}
+                          workout={workout}
+                        />
+                      ))}
+                    </View>
+                  </ScrollView>
+                ) : (
+                  <View style={[{ flex: 1, alignItems: "center", justifyContent: "center", opacity: 0.3, paddingBottom: 60 }]}>
+                    <FontAwesome5 name="dumbbell" size={60} style={[styles.iconLogo, { marginRight: 0 }]} />
+                    <Text style={[styles.title, { marginRight: 0 }]}>GymTracker</Text>
+                    <Text>No workouts yet</Text>
+                  </View>
+                )}
+
+              </View>
+
+              <Text style={[styles.title2, { marginBottom: 10, }]}>My BMI</Text>
+              <View style={[styles.bmiCard, getBmiStyle(), { marginBottom: 30, }]}>
+                <Text style={[styles.bmiTitle, { textAlign: "center" }]}>BMI Value: {bmi}</Text>
+                <Text style={[styles.text, { marginBottom: 20, }]}>{getMessage()}</Text>
+              </View>
+
             </View>
 
           </View>
-
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -353,6 +415,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "white",
+    paddingTop: 60
   },
 
   header: {
@@ -364,7 +427,7 @@ const styles = StyleSheet.create({
 
     textAlign: 'left',
 
-    marginBottom: 50,
+    marginBottom: 40,
     marginHorizontal: 20,
 
     //iOS
@@ -404,6 +467,13 @@ const styles = StyleSheet.create({
     color: "black",
   },
 
+  textGraph: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+
+    color: "black",
+  },
+
   titleContent: {
     flex: 1,
     flexDirection: 'row',
@@ -430,6 +500,86 @@ const styles = StyleSheet.create({
 
   quickStartWrap: {
 
+  },
+
+  workoutCardBright: {
+    backgroundColor: "white",
+    flex: 1,
+    width: "100%",
+    height: 150,
+
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+
+    marginBottom: 30,
+
+    borderColor: "blue",
+    borderWidth: 5,
+    borderRadius: 20,
+
+    overflow: "hidden",
+
+    //iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+
+    //Android
+    elevation: 5,
+
+  },
+
+  workoutCardDark: {
+    backgroundColor: "blue",
+
+    flex: 1,
+    width: "100%",
+    height: 150,
+
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+
+    marginBottom: 30,
+
+    borderRadius: 20,
+
+    overflow: "hidden",
+
+    //iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+
+    //Android
+    elevation: 5,
+
+  },
+
+  titleDark: {
+    color: "white",
+    fontSize: 20,
+    fontFamily: 'AlfaSlabOne_400Regular',
+
+  },
+
+  titleBright: {
+    color: "black",
+    fontSize: 20,
+    fontFamily: 'AlfaSlabOne_400Regular',
+  },
+
+  textDark: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+  },
+
+  textBright: {
+    color: "black",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
   },
 
   bmiCard: {
