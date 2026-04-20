@@ -7,12 +7,12 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth } from '../firebase';
 
-
-
+import { Ionicons } from '@expo/vector-icons';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [canSee, setCanSee] = useState(false);
   const router = useRouter();
 
   const login = async () => {
@@ -45,20 +45,31 @@ const Login = () => {
             <TextInput
               style={styles.input}
               value={email}
+              autoCapitalize='none'
               onChangeText={setEmail}
               placeholder="Email"
               placeholderTextColor={"#000000a9"}
               keyboardType='email-address'
             />
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor={"#000000a9"}
-              secureTextEntry
-              textContentType='password'
-            />
+            <View style={{ position: "relative" }}>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                style={[styles.input, { width: "100%", minHeight: 47 }]}
+                placeholder="Password"
+                placeholderTextColor={"#000000a9"}
+                secureTextEntry={(!canSee)}
+                textContentType="password"
+                multiline={false}
+                clearTextOnFocus={false}
+              />
+              <Pressable
+                onPress={() => setCanSee(!canSee)}
+                style={{ position: "absolute", bottom: 26, right: 20 }}
+              >
+                <Ionicons name={(!canSee) ? "eye-off-outline" : "eye-outline"} color={"blue"} size={30} />
+              </Pressable>
+            </View>
 
             <Pressable
               style={({ pressed }) => [

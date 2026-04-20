@@ -31,7 +31,7 @@ const TabsLayout = () => {
         <Tabs.Screen
             name='workout'
             options={{
-                title: "Workout",
+                title: "Workouts",
                 tabBarIcon: ({color, size}) => <FontAwesome5 name="dumbbell" size={24} color={color}/>,
             }}
         />

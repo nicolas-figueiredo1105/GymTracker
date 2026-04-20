@@ -150,8 +150,8 @@ export default function Workout() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView showsVerticalScrollIndicator={true} style={styles.screen}>
+    <View style={styles.screen}>
+      <ScrollView showsVerticalScrollIndicator={true} style={{flex: 1, padding: 0}}>
         <View style={styles.header}>
           <FontAwesome5 name="dumbbell" size={20} style={styles.iconLogo} />
           <Text style={styles.title}>Gym Tracker</Text>
@@ -189,7 +189,7 @@ export default function Workout() {
       >
         <Ionicons name="add" size={60} color={"white"} />
       </Pressable>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "white",
+    paddingTop: 60,
   },
 
   header: {

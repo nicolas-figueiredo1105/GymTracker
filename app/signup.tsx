@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { Ionicons } from '@expo/vector-icons';
 
 
 const SignUp = () => {
@@ -11,7 +12,11 @@ const SignUp = () => {
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [streak, setStreak] = useState(0);
+
     const router = useRouter();
+
+    const [canSee, setCanSee] = useState(false);
 
     const signUp = async () => {
         try {
@@ -23,6 +28,7 @@ const SignUp = () => {
                 first_name: firstName,
                 last_name: lastName,
                 email: email,
+                streak: streak,
             });
 
             console.log("User created: ", user.uid);
@@ -67,19 +73,29 @@ const SignUp = () => {
                             style={[styles.input, {width: "100%"}]}
                             value={email}
                             onChangeText={setEmail}
+                            autoCapitalize='none'
                             placeholder="Email"
                             placeholderTextColor={"#000000a9"}
                             keyboardType='email-address'
                         />
-                        <TextInput
+                        <View style={{position: "relative"}}>
+                          <TextInput
                             value={password}
                             onChangeText={setPassword}
-                            style={[styles.input, {width: "100%"}]}
+                            style={[styles.input, {width: "100%", minHeight: 47}]}
                             placeholder="Password"
                             placeholderTextColor={"#000000a9"}
-                            secureTextEntry
-                            textContentType='password'
+                            secureTextEntry={(!canSee)}
+                            textContentType="password"
                         />
+                        <Pressable
+                                onPress={() => setCanSee(!canSee)}
+                                style={{position: "absolute", bottom: 8, right: 20}}
+                            >
+                                <Ionicons name={(!canSee) ? "eye-off-outline" : "eye-outline"} color={"blue"} size={30}/>
+                            </Pressable>  
+                        </View>
+                        
                     </View>
 
                     <Pressable

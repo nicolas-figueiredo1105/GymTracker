@@ -7,7 +7,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 import { getAuth } from "firebase/auth";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 
@@ -26,6 +26,7 @@ export default function Home() {
 
   const [firstName, setFirstName] = useState('');
   const [streak, setStreak] = useState(0);
+  const [initWeight, setInitWeight] = useState("");
 
   const [workouts, setWorkouts] = useState<any>(null);
 
@@ -78,6 +79,23 @@ export default function Home() {
       setWorkoutTitles([]);
     }, [])
   );
+
+  //Load initial weight for selected exercise
+useEffect(() => {
+  const loadInitWeight = async () => {
+    if (!selectedWorkout || !selectedExercise) return;
+
+    const workoutData = selectedWorkout;
+
+    const exercise = workoutData.exercises.find(
+      (ex: any) => ex.name === selectedExercise
+    );
+
+    setInitWeight(exercise?.initialWeight ?? "");
+  };
+
+  loadInitWeight();
+}, [selectedWorkout, selectedExercise]);
 
   //Load workouts
   useEffect(() => {
@@ -252,6 +270,9 @@ export default function Home() {
 
 
 
+
+
+
   return (
 
 
@@ -278,86 +299,102 @@ export default function Home() {
           <View style={{ flex: 1, }}>
 
             <View>
-              <Text style={[styles.title2, { marginBottom: 10 }]}>View Weight Progress</Text>
-              <Text style={[styles.text, { marginBottom: 30, }]}>Check how much you progressed based on the average weight lifted in each of your workouts.</Text>
-              <View style={[{ flexDirection: "row", flex: 1, marginBottom: 40, justifyContent: "space-around" }]}>
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholder="Select Workout"
-                  placeholderStyle={{ fontFamily: "Poppins_700Bold" }}
-                  selectedTextStyle={{ fontFamily: "Poppins_700Bold" }}
-                  onChange={(item) => {
-                    const workout = workouts.find((w: any) => w.id === item.value);
-                    setSelectedWorkout(workout);
+              <Text style={[styles.title2, { marginBottom: 20 }]}>Lifting Progress</Text>
+              {workoutTitles.length > 0 ? (
+                <>
+                  <Text style={[styles.text, { marginBottom: 30, }]}>Check how much you progressed based on the average weight lifted in each of your workouts.</Text>
+                  <View style={[{ flexDirection: "row", flex: 1, marginBottom: 40, justifyContent: "space-around" }]}>
+                    <Dropdown
+                      style={styles.dropdown}
+                      placeholder="Select Workout"
+                      placeholderStyle={{ fontFamily: "Poppins_700Bold" }}
+                      selectedTextStyle={{ fontFamily: "Poppins_700Bold" }}
+                      onChange={(item) => {
+                        const workout = workouts.find((w: any) => w.id === item.value);
+                        setSelectedWorkout(workout);
 
-                    setSelectExercise(null);
-                    setExerciseWeightHistory([]);
-                  }}
-                  data={workoutTitles}
-                  labelField={"label"}
-                  valueField={"value"}
-                />
-
-                {selectedWorkout && (
-                  <Dropdown
-                    style={[styles.dropdown,]}
-                    placeholderStyle={{ fontFamily: "Poppins_700Bold" }}
-                    selectedTextStyle={{ fontFamily: "Poppins_700Bold" }}
-                    onChange={(item) => setSelectExercise(item.value)}
-                    placeholder="Select Exercise"
-                    data={exercises}
-                    labelField={"label"}
-                    valueField={"value"}
-                    value={selectedExercise}
-                  />
-
-                )}
-              </View>
-
-
-              {selectedExercise && (
-                <View style={{ marginBottom: 40 }}>
-                  {exerciseWeightHistory.length > 0 ? (
-                    <LineChart
-                      data={exerciseWeightHistory}
-                      focusEnabled
-                      focusedDataPointColor={"blue"}
-                      showDataPointOnFocus
-                      focusedDataPointLabelComponent={(info: any) => {
-                        return (
-                          <View style={{
-                            backgroundColor: "blue",
-                            padding: 8,
-                            borderRadius: 4,
-                            zIndex: 100,
-                          }}>
-                            <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Weight: {info.value}lbs</Text>
-                            <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Date: {info.label}</Text>
-                          </View>
-                        )
+                        setSelectExercise(null);
+                        setExerciseWeightHistory([]);
                       }}
-                      dataPointLabelWidth={150}
-                      dataPointLabelShiftY={40}
-                      dataPointLabelShiftX={20}
-
-                      spacing={100}
-                      xAxisLabelTextStyle={[styles.textGraph, { width: 100, }]}
-                      yAxisTextStyle={styles.textGraph}
-
-
-                      initialSpacing={60}
-                      endSpacing={60}
-
-                      delayBeforeUnFocus={1000}
-
+                      data={workoutTitles}
+                      labelField={"label"}
+                      valueField={"value"}
                     />
-                  ) : (
-                    <Text style={[styles.text, { textAlign: "center" }]}>
-                      No workout history for this exercise.
-                    </Text>
+
+                    {selectedWorkout && (
+                      <Dropdown
+                        style={[styles.dropdown,]}
+                        placeholderStyle={{ fontFamily: "Poppins_700Bold" }}
+                        selectedTextStyle={{ fontFamily: "Poppins_700Bold" }}
+                        onChange={(item) => setSelectExercise(item.value)}
+                        placeholder="Select Exercise"
+                        data={exercises}
+                        labelField={"label"}
+                        valueField={"value"}
+                        value={selectedExercise}
+                      />
+
+                    )}
+                  </View>
+
+
+                  {selectedExercise && (
+
+                    <View style={{ marginBottom: 40 }}>
+                      {exerciseWeightHistory.length > 0 ? (
+                        <View>
+                          <Text style={[styles.text, { fontSize: 20 }]}>{selectedExercise}</Text>
+                          <Text style={[styles.text, {marginBottom: 20}]}>Initial weight:  <Text style={{color: "blue"}}>{initWeight} lbs</Text></Text>
+                          <LineChart
+                            data={exerciseWeightHistory}
+                            focusEnabled
+                            focusedDataPointColor={"blue"}
+                            showDataPointOnFocus
+                            focusedDataPointLabelComponent={(info: any) => {
+                              return (
+                                <View style={{
+                                  backgroundColor: "blue",
+                                  padding: 8,
+                                  borderRadius: 4,
+                                  zIndex: 100,
+                                }}>
+                                  <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Weight: {info.value}lbs</Text>
+                                  <Text style={{ color: "white", fontFamily: "Poppins_700Bold" }}>Date: {info.label}</Text>
+                                </View>
+                              )
+                            }}
+                            dataPointLabelWidth={150}
+                            dataPointLabelShiftY={40}
+                            dataPointLabelShiftX={20}
+
+                            spacing={100}
+                            xAxisLabelTextStyle={[styles.textGraph, { width: 100, }]}
+                            yAxisTextStyle={styles.textGraph}
+
+
+                            initialSpacing={60}
+                            endSpacing={60}
+
+                            delayBeforeUnFocus={1000}
+
+                          />
+                        </View>
+                      ) : (
+                        <Text style={[styles.text, { textAlign: "center" }]}>
+                          No workout history for this exercise.
+                        </Text>
+                      )}
+                    </View>
                   )}
+                </>
+              ) : (
+                <View style={[{ flex: 1, alignItems: "center", justifyContent: "center", opacity: 0.3, paddingBottom: 60 }]}>
+                  <FontAwesome5 name="dumbbell" size={60} style={[styles.iconLogo, { marginRight: 0 }]} />
+                  <Text style={[styles.title, { marginRight: 0 }]}>GymTracker</Text>
+                  <Text>No workouts yet</Text>
                 </View>
               )}
+
 
 
               <View style={[styles.quickStartWrap, { marginBottom: 40 }]}>

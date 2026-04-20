@@ -92,7 +92,7 @@ export default function Settings() {
 
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
       <View style={styles.header}>
         <FontAwesome5 name="dumbbell" size={20} style={styles.iconLogo} />
         <Text style={styles.title}>Gym Tracker</Text>
@@ -108,7 +108,7 @@ export default function Settings() {
 
           <Pressable
             style={[styles.settingsWrap, {}]}
-            onPress={() => router.push("/settingsScreens/viewProfile")}
+            onPress={() => router.push("../settingsScreens/viewProfile")}
           >
             <View style={[styles.settingsIconWrap]}>
               <MaterialIcons name="account-circle" size={30} color={"blue"} />
@@ -123,7 +123,7 @@ export default function Settings() {
 
           <Pressable
             style={[styles.settingsWrap, {}]}
-            onPress={() => router.push("/settingsScreens/aboutUs")}
+            onPress={() => router.push("../settingsScreens/aboutUs")}
           >
             <View style={[styles.settingsIconWrap]}>
               <FontAwesome5 name="question" size={30} color={"blue"} />
@@ -152,7 +152,7 @@ export default function Settings() {
 
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
 
   screen: {
     flex: 1,
+    paddingTop: 60,
     backgroundColor: "white",
   },
 
