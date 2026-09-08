@@ -58,17 +58,17 @@ const Login = () => {
                 style={[styles.input, { width: "100%", minHeight: 47 }]}
                 placeholder="Password"
                 placeholderTextColor={"#000000a9"}
-                secureTextEntry={(!canSee)}
-                textContentType="password"
-                multiline={false}
-                clearTextOnFocus={false}
+                secureTextEntry={!canSee}
               />
-              <Pressable
-                onPress={() => setCanSee(!canSee)}
-                style={{ position: "absolute", bottom: 26, right: 20 }}
-              >
-                <Ionicons name={(!canSee) ? "eye-off-outline" : "eye-outline"} color={"blue"} size={30} />
-              </Pressable>
+              
+                <Ionicons 
+                  style={{ position: "absolute", bottom: 26, right: 20 }}
+                  name={(!canSee) ? "eye-off-outline" : "eye-outline"} 
+                  color={"blue"} 
+                  size={30} 
+                  onPress={() => setCanSee(!canSee)}
+                />
+
             </View>
 
             <Pressable

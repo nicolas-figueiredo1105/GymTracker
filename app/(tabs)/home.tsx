@@ -28,6 +28,8 @@ export default function Home() {
   const [streak, setStreak] = useState(0);
   const [initWeight, setInitWeight] = useState("");
 
+  const [welcomeMessage, setWelcomeMessage] = useState('');
+
   const [workouts, setWorkouts] = useState<any>(null);
 
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
@@ -41,12 +43,16 @@ export default function Home() {
 
   const [bmi, setBmi] = useState(0);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   //Load name, streak and BMI
   useFocusEffect(
     useCallback(() => {
       const loadName = async () => {
         const getFName = await getFirstName();
         setFirstName(getFName);
+
+        setIsLoading(false);
       };
 
       const heightToInt = async () => {
@@ -81,21 +87,21 @@ export default function Home() {
   );
 
   //Load initial weight for selected exercise
-useEffect(() => {
-  const loadInitWeight = async () => {
-    if (!selectedWorkout || !selectedExercise) return;
+  useEffect(() => {
+    const loadInitWeight = async () => {
+      if (!selectedWorkout || !selectedExercise) return;
 
-    const workoutData = selectedWorkout;
+      const workoutData = selectedWorkout;
 
-    const exercise = workoutData.exercises.find(
-      (ex: any) => ex.name === selectedExercise
-    );
+      const exercise = workoutData.exercises.find(
+        (ex: any) => ex.name === selectedExercise
+      );
 
-    setInitWeight(exercise?.initialWeight ?? "");
-  };
+      setInitWeight(exercise?.initialWeight ?? "");
+    };
 
-  loadInitWeight();
-}, [selectedWorkout, selectedExercise]);
+    loadInitWeight();
+  }, [selectedWorkout, selectedExercise]);
 
   //Load workouts
   useEffect(() => {
@@ -206,6 +212,13 @@ useEffect(() => {
 
   }, [selectedWorkout, selectedExercise]);
 
+//Load welcome message
+  useEffect(() => {
+    if(!isLoading){
+      setWelcomeMessage("Hello " + firstName + ",");
+    }
+  }, [firstName])
+
   const getUserData = async () => {
     const user = auth.currentUser;
 
@@ -270,9 +283,6 @@ useEffect(() => {
 
 
 
-
-
-
   return (
 
 
@@ -293,7 +303,7 @@ useEffect(() => {
         </View>
         <View style={styles.content}>
           <View>
-            <Text style={[styles.title, { marginBottom: 20, fontSize: 28, }]}>Hello {firstName},</Text>
+            <Text style={[styles.title, { marginBottom: 20, fontSize: 28, }]}>{welcomeMessage}</Text>
           </View>
 
           <View style={{ flex: 1, }}>
@@ -344,7 +354,7 @@ useEffect(() => {
                       {exerciseWeightHistory.length > 0 ? (
                         <View>
                           <Text style={[styles.text, { fontSize: 20 }]}>{selectedExercise}</Text>
-                          <Text style={[styles.text, {marginBottom: 20}]}>Initial weight:  <Text style={{color: "blue"}}>{initWeight} lbs</Text></Text>
+                          <Text style={[styles.text, { marginBottom: 20 }]}>Initial weight:  <Text style={{ color: "blue" }}>{initWeight} lbs</Text></Text>
                           <LineChart
                             data={exerciseWeightHistory}
                             focusEnabled
