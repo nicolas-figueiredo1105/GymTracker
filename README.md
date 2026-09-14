@@ -35,7 +35,7 @@ In the output, you'll find options to open the app in a
 The first screen users see is the Login screen, where they can either log into an existing account or create a new one.
 
 <p align="center">
-  <img src="assets/images/screenshots/Login_Page.PNG" width="300">
+  <img src="assets/images/screenshots/Login_Page.png" width="300">
 </p>
 
 When creating an account, the application collects the user’s first name, last name, email, and password. After creating an account, users are asked to provide additional information such as body weight, height, and date of birth. This information allows GymTracker to provide a more personalized experience.
