@@ -1,4 +1,4 @@
-# GymTracker 💪🏋️
+ GymTracker 💪🏋️
 
 
 ## What is GymTracker?
@@ -27,11 +27,63 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
+
 ## App Guide
-The first screen that the user can see is the Login screen. The user is given the choice of creating an account or log in with an existent one. If the user decides to create a new one, the app will require a first name, last name, email and password. After that, the app will ask for more specific data to provie a more personalized experience, such as body weight, height and date of birth. \
-Once logged in, the user will have access to the home screen, where it will be possible to access the Workout and Settings screens.
+
+### Login & Account Creation
+
+The first screen users see is the Login screen, where they can either log into an existing account or create a new one.
+
+<p align="center">
+  <img src="assets/images/screenshots/Login_Page.PNG" width="300">
+</p>
+
+When creating an account, the application collects the user’s first name, last name, email, and password. After creating an account, users are asked to provide additional information such as body weight, height, and date of birth. This information allows GymTracker to provide a more personalized experience.
+
+### Home Screen
+
+After logging in, users are taken to the Home screen, which serves as the main hub for the application.
+
+<p align="center">
+  <img src="assets/images/screenshots/Home_Page.PNG" width="300">
+</p>
+
+From the Home screen, users can access their workouts and application settings.
+
+### Creating a Workout
+
+Users can create their own custom workouts by adding exercises and configuring their workout routine.
+
+<p align="center">
+  <img src="assets/images/screenshots/Create_Workout_Page.PNG" width="300">
+</p>
+
+### Workout Tracking
+
+Once a workout has been created, users can access it through the Workout screen and track their progress throughout the session.
+
+<p align="center">
+  <img src="assets/images/screenshots/Workout_Page.PNG" width="300">
+</p>
+
+Users can record the weight and repetitions for each exercise, allowing them to keep track of their progression over time.
+
+### Starting a Workout
+
+GymTracker also includes a dedicated workout session screen where users can actively track their workout and use the built-in timer.
+
+<p align="center">
+  <img src="assets/images/screenshots/Start_Workout_Page.PNG" width="300">
+</p>
 
 ## About This Project
-I developed this app for my Software Engineer class at Oakland Community College. I decided to use React Native to develop due to its high flexibility, althought I had little to none knowledge on this coding language. \
-Throughout this project, I learned new skills, got much more familiar with React Native syntax, and improved my Javascript coding. I also learned how to implement databases, which I initially started with SQLite and later upgraded to Firebase for scalability and on cloud data storage, along of how to retrieve and manipulate data. \
-There were many challenges while developing this app, especially due to lack of familiarity to the language, but I used Artificial Intelligence and learning websites as learning tools to improve my skills and gain more knowledge. 
+
+I originally developed GymTracker as a project for my Software Engineering class at Oakland Community College. I chose React Native because of its flexibility for mobile application development, despite having little to no prior experience with the framework.
+
+Throughout this project, I developed new skills, became much more familiar with React Native and JavaScript, and gained experience working with databases and cloud-based data storage.
+
+I initially used SQLite for data storage before transitioning to Firebase to provide better scalability and cloud data storage. This also gave me hands-on experience retrieving, manipulating, and managing user-specific data.
+
+One of the biggest challenges throughout development was learning a new framework while simultaneously building the application. I used AI tools, documentation, and online learning resources as supplemental learning tools to help me understand unfamiliar concepts, troubleshoot problems, and improve my programming skills.
+
+Overall, this project gave me practical experience with mobile application development, database management, authentication, cloud storage, and software development practices.
