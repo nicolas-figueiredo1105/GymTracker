@@ -45,7 +45,7 @@ When creating an account, the application collects the user’s first name, last
 After logging in, users are taken to the Home screen, which serves as the main hub for the application.
 
 <p align="center">
-  <img src="assets/images/screenshots/Home_Page.PNG" width="300">
+  <img src="assets/images/screenshots/Home_Page.png" width="300">
 </p>
 
 From the Home screen, users can access their workouts and application settings.
@@ -55,7 +55,7 @@ From the Home screen, users can access their workouts and application settings.
 Users can create their own custom workouts by adding exercises and configuring their workout routine.
 
 <p align="center">
-  <img src="assets/images/screenshots/Create_Workout_Page.PNG" width="300">
+  <img src="assets/images/screenshots/Create_Workout_Page.png" width="300">
 </p>
 
 ### Workout Tracking
@@ -63,7 +63,7 @@ Users can create their own custom workouts by adding exercises and configuring t
 Once a workout has been created, users can access it through the Workout screen and track their progress throughout the session.
 
 <p align="center">
-  <img src="assets/images/screenshots/Workout_Page.PNG" width="300">
+  <img src="assets/images/screenshots/Workout_Page.png" width="300">
 </p>
 
 Users can record the weight and repetitions for each exercise, allowing them to keep track of their progression over time.
@@ -73,7 +73,7 @@ Users can record the weight and repetitions for each exercise, allowing them to 
 GymTracker also includes a dedicated workout session screen where users can actively track their workout and use the built-in timer.
 
 <p align="center">
-  <img src="assets/images/screenshots/Start_Workout_Page.PNG" width="300">
+  <img src="assets/images/screenshots/Start_Workout_Page.png" width="300">
 </p>
 
 ## About This Project
