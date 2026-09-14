@@ -1,4 +1,4 @@
- GymTracker 💪🏋️
+# GymTracker 💪🏋️
 
 
 ## What is GymTracker?
