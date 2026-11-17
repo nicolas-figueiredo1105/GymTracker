@@ -13,58 +13,8 @@ import { db } from "../../firebase";
 
 
 export default function AboutUs() {
-
-  const auth = getAuth();
-
-  const [workoutTitle, setWorkoutTitle] = useState('');
-  const [exercises, setExercises] = useState<string[]>([]);
-  const [sets, setSets] = useState<string[]>([]);
-  const [initialWeight, setInitialWeight] = useState<string[]>([]);
-
+  
   const router = useRouter();
-
-
-  const createNewExercise = () => {
-    setExercises(prev => [...prev, ""]);
-  }
-
-  const saveWorkout = async () => {
-    if (!isEmpty()) {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const ref = collection(db, "users", user.uid, "workouts");
-
-        const workout = {
-          title: workoutTitle,
-          exercises: exercises.map((exercise, index) => ({
-            name: exercise,
-            sets: sets[index] || "",
-            initialWeight: initialWeight[index] || "",
-          })),
-          createdAt: new Date(),
-        };
-
-        await addDoc(ref, workout);
-
-        console.log("Workout created.");
-        router.back();
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      alert("Empty workout title and/or only one exercise logged. Insert title and add more than one exercise.")
-    }
-  };
-
-  const isEmpty = () => {
-    if (exercises.length <= 1 && workoutTitle.trim() === "") {
-      return true;
-    }
-    return false;
-  }
-
 
   return (
 

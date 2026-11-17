@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, validatePassword } from 'firebase/auth';
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { Ionicons } from '@expo/vector-icons';
+import PasswordRequirements, {isPasswordValid} from '@/constants/PasswordRequirements';
 
 
 const SignUp = () => {
@@ -13,6 +14,7 @@ const SignUp = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [streak, setStreak] = useState(0);
+    
 
     const router = useRouter();
 
@@ -38,7 +40,6 @@ const SignUp = () => {
             alert("Empty fields! Please fill up all the required information.")
         }
     };
-
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -93,26 +94,35 @@ const SignUp = () => {
                                 style={{position: "absolute", bottom: 8, right: 20}}
                             >
                                 <Ionicons name={(!canSee) ? "eye-off-outline" : "eye-outline"} color={"blue"} size={30}/>
-                            </Pressable>  
+                        </Pressable>  
+                        </View>
+
+                        <View>
+                            <PasswordRequirements password={password}/>
+
                         </View>
                         
                     </View>
 
                     <Pressable
+                        disabled={!isPasswordValid(password)}
                         style={({ pressed }) => [
                             styles.signupButton,
                             {
                                 backgroundColor: pressed ? "white" : "blue",
-                                color: pressed ? "blue" : "white"
+                                color: pressed ? "blue" : "white",
+                                opacity: !isPasswordValid ? 1.0 : 0.7,
                             }
                         ]}
-                        onPress={() => {                    
-                            signUp();
+                        onPress={() => {           
                             
+                            signUp();
+
                             setFirstName('');
                             setLastName('');
                             setEmail('');
                             setPassword('');
+                            
                         }}
                     >
                         {({ pressed }) => (
@@ -126,6 +136,8 @@ const SignUp = () => {
         </TouchableWithoutFeedback>
     )
 }
+
+
 const styles = StyleSheet.create({
     profileIcon: {
         position: 'absolute',

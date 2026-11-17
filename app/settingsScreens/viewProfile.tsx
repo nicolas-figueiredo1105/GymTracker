@@ -63,36 +63,25 @@ export default function Settings() {
       const loadUser = async () => {
         const user = auth.currentUser;
 
-        const firstName = await getFirstName();
+        const firstName = await loadData("first_name");
         const streak = await getStreak();
         const lastName = await loadData("last_name");
         const weight = await loadData("body_weight");
         const height = await loadData("height");
         const email = await user?.email;
 
-        if (firstName) {
-          setFirstName(firstName);
-        }
+        if (firstName) setFirstName(firstName);
 
-        if (streak) {
-          setStreak(streak);
-        }
+        if (streak) setStreak(streak);
+        
+        if (lastName) setLastName(lastName);
+        
+        if (email) setEmail(email);
 
-        if (lastName) {
-          setLastName(lastName);
-        }
+        if (weight) setWeight(weight);
 
-        if (email) {
-          setEmail(email);
-        }
-
-        if (weight) {
-          setWeight(weight);
-        }
-
-        if (height) {
-          setHeight(height);
-        }
+        if (height) setHeight(height);
+        
       };
 
       loadUser();

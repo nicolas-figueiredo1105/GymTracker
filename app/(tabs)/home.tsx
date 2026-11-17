@@ -57,6 +57,7 @@ export default function Home() {
 
       const heightToInt = async () => {
         const userData = await getUserData();
+        if(userData == null) return -1;
         const height = userData?.height;
 
         return (parseInt(height.substring(2, 4))) + (parseInt(height.substring(0, 1)) * 12);

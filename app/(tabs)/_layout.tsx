@@ -25,7 +25,7 @@ const TabsLayout = () => {
             name='home'
             options={{
                 title: "Home",
-                tabBarIcon: ({color, size}) => <Ionicons name='home' size = {size} color = {color}/>,
+                tabBarIcon: ({color, size}) => <Ionicons name='home' size={size} color={color as string} />,
             }}
         />
         <Tabs.Screen
@@ -39,7 +39,7 @@ const TabsLayout = () => {
             name='settings'
             options={{
                 title: "Settings",
-                tabBarIcon: ({color, size}) => <Ionicons name='settings-outline' size = {size} color = {color}/>,
+                tabBarIcon: ({color, size}) => <Ionicons name='settings-outline' size={size} color={color as string} />,
             }}
         />
         
